@@ -385,25 +385,28 @@ confidence_score = 0.4 * conf_class + 0.4 * avg_sim + 0.2 * self_eval
 
 ---
 
-## Приложение: Mermaid‑диаграмма архитектуры (код)
+## Приложение: Mermaid‑диаграмма архитектуры
 
 ```mermaid
 flowchart TD
+
   subgraph Ingestion
-    A[Email Receiver\n(IMAP / webhook)] --> B[Preprocessor\n(cleaning / parsing)]
+    A["Email Receiver (IMAP / Webhook)"]
+    B["Preprocessor (Cleaning / Parsing)"]
+    A --> B
   end
 
   subgraph AI
-    C[LLM Service\n(entity extraction, classification, generation)]
-    D[Vector DB / RAG\n(FAISS / Milvus / Pinecone)]
+    C["LLM Service - entity extraction, classification, generation"]
+    D["Vector DB / RAG - FAISS, Milvus, Pinecone"]
   end
 
   subgraph Storage
-    E[PostgreSQL\n(tickets)]
+    E["PostgreSQL - tickets"]
   end
 
   subgraph Orchestration
-    O[Orchestrator / Worker]
+    O["Orchestrator / Worker"]
   end
 
   B --> O
@@ -412,8 +415,7 @@ flowchart TD
   D --> C
   C --> E
   O --> E
-  E --> UI[Operator UI]
-  E --> Mailer[Mailer (SMTP)]
+  E --> UI["Operator UI"]
+  E --> Mailer["Mailer (SMTP)"]
   UI --> O
 ```
-
