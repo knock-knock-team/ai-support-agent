@@ -98,22 +98,26 @@
 
 **Примерная структура таблицы:**
 
-| Поле | Тип | Описание |
-|---|---:|---|
-| id | UUID / serial | Идентификатор обращения |
-| email | string | Адрес клиента |
-| organization | string | Название организации |
-| fio | string | ФИО клиента |
-| phone | string | Телефон |
-| device_type | string | Тип прибора |
-| serial_number | string | Заводской номер |
-| category | enum | Категория обращения |
-| confidence_score | float | Итоговый confidence (0–1) |
-| status | enum | Статус обращения (new, ai_generated, operator_review, closed) |
-| ai_generated_answer | text | Текст ответа, сгенерированный AI |
-| operator_answer | text | Версия ответа оператора |
-| created_at | timestamptz | Дата создания |
-| updated_at | timestamptz | Дата обновления |
+| Поле                |           Тип | Описание                                                      |
+|---------------------|--------------:|---------------------------------------------------------------|
+| id                  | UUID / serial | Идентификатор обращения                                       |
+| email               |        string | Адрес клиента                                                 |
+| organization        |        string | Название организации                                          |
+| fio                 |        string | ФИО клиента                                                   |
+| phone               |        string | Телефон                                                       |
+| device_type         |        string | Тип прибора                                                   |
+| serial_number       |        string | Заводской номер                                               |
+| category            |          enum | Категория обращения                                           |
+| project             |        string | Проект обращения                                              |
+| inn                 |        string | ИНН организации                                               |
+| country_region      |        string | Страна или регион                                             |
+| file                |        byte[] | Файл                                                          |
+| confidence_score    |         float | Итоговый confidence (0–1)                                     |
+| status              |          enum | Статус обращения (new, ai_generated, operator_review, closed) |
+| ai_generated_answer |          text | Текст ответа, сгенерированный AI                              |
+| operator_answer     |          text | Версия ответа оператора                                       |
+| created_at          |   timestamptz | Дата создания                                                 |
+| updated_at          |   timestamptz | Дата обновления                                               |
 
 
 ### Шаг 3. Поиск по базе знаний (RAG)
