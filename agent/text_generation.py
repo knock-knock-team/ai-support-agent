@@ -7,18 +7,28 @@ from dotenv import load_dotenv
 load_dotenv()  
 
 MAX_NEW_TOKENS = os.getenv("MAX_NEW_TOKENS")
+TEMPERATURE = float(os.getenv("TEMPERATURE", "0.7"))
+TOP_P = float(os.getenv("TOP_P", "0.8"))
+
 model_name = "Qwen/Qwen3-4B-Instruct-2507-FP8"
+
+cache_dir = "./models_cache"
+os.makedirs(cache_dir, exist_ok=True)
 
 # load the tokenizer and the model
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 model = AutoModelForCausalLM.from_pretrained(
     model_name,
     torch_dtype="auto",
-    device_map="auto"
+    device_map="auto",
+    cache_dir=cache_dir
 )
 
 # prepare the model input
 prompt = "Ответь на вопрос, используя только контекст."
+
+# TODO: Нужна функция для получения вопроса от пользователя (select запрос в бд с карточкой обращения)
+question = ""
 
 # TODO: Нужна функция для получения контекста из топ k релевантных документов базы знаний
 context = ""
@@ -37,6 +47,8 @@ messages = [
         {context}
 
         Вопрос:
+        {question}
+
         {prompt}
         """
     }
