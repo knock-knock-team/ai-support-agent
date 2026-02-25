@@ -209,22 +209,21 @@ LLM генерирует стандартизированный ответ со 
 
 ```mermaid
 flowchart LR
-  A[Поступление письма] --> B[Очистка письма]
-  B --> C[Извлечение сущностей (LLM)]
-  C --> D[Классификация (LLM)]
-  D --> E[Создание карточки в БД]
-  E --> F[RAG: поиск релевантных документов]
-  F --> G[Генерация ответа (LLM)]
-  G --> H[Оценка confidence]
-  H -->|> порог p| I[Автоотправка]
-  H -->|<= порог p| J[Отправка оператору на проверку]
-  J --> K[Оператор редактирует и отправляет]
-  I --> L[Статус: закрыт (AI)]
-  K --> M[Статус: закрыт (operator)]
+  A["Поступление письма"] --> B["Очистка письма"]
+  B --> C["Извлечение сущностей - LLM"]
+  C --> D["Классификация - LLM"]
+  D --> E["Создание карточки в БД"]
+  E --> F["RAG: поиск релевантных документов"]
+  F --> G["Генерация ответа - LLM"]
+  G --> H["Оценка confidence"]
+
+  H -->|confidence > p| I["Автоотправка клиенту"]
+  H -->|confidence <= p| J["Проверка оператором"]
+
+  J --> K["Оператор редактирует и отправляет"]
+  I --> L["Статус: закрыт AI"]
+  K --> M["Статус: закрыт оператором"]
 ```
-
-> Примечание: Mermaid диаграммы можно визуализировать в GitHub / VSCode с поддержкой Mermaid.
-
 
 ---
 
@@ -246,17 +245,35 @@ flowchart LR
 
 ```mermaid
 flowchart TD
-  Email[Email Receiver] --> Pre[Preprocessor]
-  Pre --> LLM[LLM Service]
-  LLM --> DB[PostgreSQL]
-  DB --> UI[Operator UI]
-  LLM --> RAG[Vector DB / RAG]
-  RAG --> LLM
-  DB --> Mailer[Mailer]
-  Orchestrator --> LLM
-  Orchestrator --> RAG
-  Orchestrator --> DB
-  OperatorUI --> Orchestrator
+
+  subgraph Ingestion
+    A["Email Receiver (IMAP / Webhook)"]
+    B["Preprocessor (Cleaning / Parsing)"]
+    A --> B
+  end
+
+  subgraph AI
+    C["LLM Service"]
+    D["Vector DB / RAG"]
+    C --> D
+    D --> C
+  end
+
+  subgraph Storage
+    E["PostgreSQL (Tickets)"]
+  end
+
+  subgraph Orchestration
+    O["Orchestrator / Worker"]
+  end
+
+  B --> O
+  O --> C
+  C --> E
+  O --> E
+  E --> UI["Operator UI"]
+  E --> M["Mailer (SMTP)"]
+  UI --> O
 ```
 
 
