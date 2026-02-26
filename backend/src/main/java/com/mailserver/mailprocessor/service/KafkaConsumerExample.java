@@ -6,11 +6,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
-/**
- * Example Kafka Consumer for testing
- * This service listens to the email-requests topic
- * In production, this would be in a separate AI service
- */
 @Service
 @Slf4j
 @ConditionalOnProperty(name = "kafka.enabled", havingValue = "true", matchIfMissing = true)
@@ -34,8 +29,5 @@ public class KafkaConsumerExample {
         log.info("Status: {}", request.getStatus());
         log.info("Subject: {}", request.getEmailSubject());
         log.info("===================================");
-        
-        // Here you would call your AI service to process the request
-        // Example: aiService.generateResponse(request);
     }
 }
