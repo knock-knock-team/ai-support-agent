@@ -33,3 +33,7 @@ build/
 .vscode/
 *.env
 *.venv
+/tests
+*__pycache__
+*/models_cache
+*.pytest_cache
