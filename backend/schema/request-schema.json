@@ -1,0 +1,144 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Request",
+  "description": "Customer support request from email",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Unique request identifier"
+    },
+    "email": {
+      "type": "string",
+      "format": "email",
+      "description": "Customer email address"
+    },
+    "organization": {
+      "type": ["string", "null"],
+      "description": "Organization name"
+    },
+    "fio": {
+      "type": ["string", "null"],
+      "description": "Customer full name (Russian: Фамилия Имя Отчество)"
+    },
+    "phone": {
+      "type": ["string", "null"],
+      "pattern": "^\\+?[0-9\\s\\-\\(\\)]+$",
+      "description": "Customer phone number"
+    },
+    "deviceType": {
+      "type": ["string", "null"],
+      "description": "Type of device/equipment"
+    },
+    "serialNumber": {
+      "type": ["string", "null"],
+      "description": "Device serial number"
+    },
+    "category": {
+      "type": ["string", "null"],
+      "enum": [
+        "TECHNICAL_SUPPORT",
+        "WARRANTY",
+        "CONSULTATION",
+        "REPAIR",
+        "INSTALLATION",
+        "CONFIGURATION",
+        "OTHER"
+      ],
+      "description": "Request category"
+    },
+    "project": {
+      "type": ["string", "null"],
+      "description": "Project name"
+    },
+    "inn": {
+      "type": ["string", "null"],
+      "pattern": "^\\d{10,12}$",
+      "description": "Tax identification number (Russian: ИНН)"
+    },
+    "countryRegion": {
+      "type": ["string", "null"],
+      "description": "Country or region"
+    },
+    "file": {
+      "type": ["string", "null"],
+      "contentEncoding": "base64",
+      "description": "File attachment (base64 encoded)"
+    },
+    "fileName": {
+      "type": ["string", "null"],
+      "description": "Name of attached file"
+    },
+    "fileContentType": {
+      "type": ["string", "null"],
+      "description": "MIME type of attached file"
+    },
+    "confidenceScore": {
+      "type": ["number", "null"],
+      "minimum": 0,
+      "maximum": 1,
+      "description": "AI confidence score (0-1)"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["NEW", "AI_GENERATED", "OPERATOR_REVIEW", "CLOSED"],
+      "default": "NEW",
+      "description": "Request processing status"
+    },
+    "aiGeneratedAnswer": {
+      "type": ["string", "null"],
+      "description": "AI generated response text"
+    },
+    "operatorAnswer": {
+      "type": ["string", "null"],
+      "description": "Operator's version of the response"
+    },
+    "emailSubject": {
+      "type": ["string", "null"],
+      "description": "Original email subject"
+    },
+    "emailBody": {
+      "type": ["string", "null"],
+      "description": "Original email body"
+    },
+    "rawEmailContent": {
+      "type": ["string", "null"],
+      "description": "Raw email content for debugging"
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Request creation timestamp"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Request last update timestamp"
+    }
+  },
+  "required": ["id", "email", "status", "createdAt", "updatedAt"],
+  "examples": [
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440000",
+      "email": "ivanov@company.ru",
+      "organization": "ООО Тестовая компания",
+      "fio": "Иванов Иван Иванович",
+      "phone": "+7 999 123-45-67",
+      "deviceType": "Счетчик электроэнергии",
+      "serialNumber": "ABC123456",
+      "category": "TECHNICAL_SUPPORT",
+      "project": "Проект Модернизация",
+      "inn": "7707123456",
+      "countryRegion": "Россия, Москва",
+      "confidenceScore": null,
+      "status": "NEW",
+      "aiGeneratedAnswer": null,
+      "operatorAnswer": null,
+      "emailSubject": "Проблема с прибором учета",
+      "emailBody": "Добрый день! У нас возникла проблема с прибором учета...",
+      "createdAt": "2026-02-25T12:00:00",
+      "updatedAt": "2026-02-25T12:00:00"
+    }
+  ]
+}
