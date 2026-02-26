@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   zookeeper:
     image: confluentinc/cp-zookeeper:7.5.0
@@ -54,25 +52,18 @@ services:
       - kafka
       - postgres
     environment:
-      # Mail Configuration
       MAIL_HOST: ${MAIL_HOST}
       MAIL_PORT: ${MAIL_PORT}
       MAIL_USERNAME: ${MAIL_USERNAME}
       MAIL_PASSWORD: ${MAIL_PASSWORD}
       MAIL_FOLDER: ${MAIL_FOLDER:-INBOX}
-      
-      # Kafka Configuration
       KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS:-kafka:9092}
       KAFKA_TOPIC_REQUESTS: ${KAFKA_TOPIC_REQUESTS:-email-requests}
-      
-      # Database Configuration
       DB_HOST: ${DB_HOST:-postgres}
       DB_PORT: ${DB_PORT:-5432}
       DB_NAME: ${DB_NAME:-mail_processor}
       DB_USERNAME: ${DB_USERNAME:-postgres}
       DB_PASSWORD: ${DB_PASSWORD:-postgres}
-      
-      # Application Configuration
       EMAIL_POLL_INTERVAL_MS: ${EMAIL_POLL_INTERVAL_MS:-30000}
       EMAIL_BATCH_SIZE: ${EMAIL_BATCH_SIZE:-10}
     networks:
