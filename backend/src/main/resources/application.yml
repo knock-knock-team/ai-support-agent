@@ -1,0 +1,74 @@
+spring:
+  application:
+    name: mail-processor-service
+  
+  # Mail Configuration
+  mail:
+    host: ${MAIL_HOST:imap.yandex.ru}
+    port: ${MAIL_PORT:993}
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        store:
+          protocol: imaps
+        imaps:
+          host: ${MAIL_HOST:imap.yandex.ru}
+          port: ${MAIL_PORT:993}
+          ssl:
+            enable: true
+            trust: "*"
+          auth: true
+          timeout: 30000
+          connectiontimeout: 30000
+  
+  # Kafka Configuration
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:29092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.add.type.headers: false
+      acks: all
+      retries: 3
+
+  # Database Configuration
+  datasource:
+    url: jdbc:postgresql://postgres:5432/mail_processor
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+
+# Kafka Configuration
+kafka:
+  enabled: ${KAFKA_ENABLED:true}
+
+# Application Configuration
+app:
+  mail:
+    folder: ${MAIL_FOLDER:INBOX}
+    poll-interval-ms: ${EMAIL_POLL_INTERVAL_MS:30000}
+    batch-size: ${EMAIL_BATCH_SIZE:10}
+  
+  kafka:
+    topic:
+      requests: ${KAFKA_TOPIC_REQUESTS:email-requests}
+
+# Logging
+logging:
+  level:
+    root: INFO
+    com.mailserver: DEBUG
+    org.springframework.kafka: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
