@@ -31,7 +31,6 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
-      # KRaft mode (no Zookeeper)
       KAFKA_PROCESS_ROLES: broker,controller
       KAFKA_NODE_ID: 1
       KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
@@ -60,24 +59,17 @@ services:
       kafka:
         condition: service_healthy
     environment:
-      # Mail Configuration
       MAIL_HOST: ${MAIL_HOST}
       MAIL_PORT: ${MAIL_PORT}
       MAIL_USERNAME: ${MAIL_USERNAME}
       MAIL_PASSWORD: ${MAIL_PASSWORD}
       MAIL_FOLDER: ${MAIL_FOLDER:-INBOX}
-      
-      # Kafka Configuration (enabled)
       KAFKA_ENABLED: "true"
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       KAFKA_TOPIC_REQUESTS: ${KAFKA_TOPIC_REQUESTS:-email-requests}
-      
-      # Database Configuration (Spring format)
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${DB_NAME:-mail_processor}
       SPRING_DATASOURCE_USERNAME: ${DB_USERNAME:-postgres}
       SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-postgres}
-      
-      # Application Configuration
       EMAIL_POLL_INTERVAL_MS: ${EMAIL_POLL_INTERVAL_MS:-30000}
       EMAIL_BATCH_SIZE: ${EMAIL_BATCH_SIZE:-10}
     ports:
