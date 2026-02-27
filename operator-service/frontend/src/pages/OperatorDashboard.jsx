@@ -58,8 +58,8 @@ export default function OperatorDashboard() {
     if (!selected || !draft.trim()) return;
     try {
       await operatorApi.updateRequest(selected.id, {
-        operatorResponse: draft,
-        operatorNotes: notes
+         operator_answer: draft,
+         operator_notes: notes
       });
       await operatorApi.sendResponse(selected.id);
       await loadPendingRequests();
