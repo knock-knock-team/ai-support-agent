@@ -80,4 +80,30 @@ public interface RequestRepository extends JpaRepository<Request, Long> {
     
     @Query("SELECT r FROM Request r WHERE r.createdAt >= :startDate ORDER BY r.createdAt DESC")
     List<Request> findRecentRequests(OffsetDateTime startDate);
+
+    @Query(value = """
+            SELECT r.id, r.created_at, r.responded_at,
+                   EXTRACT(EPOCH FROM (r.responded_at - r.created_at)) / 60 as processing_minutes
+            FROM requests r
+            WHERE r.status = 'CLOSED'
+              AND r.responded_at IS NOT NULL
+              AND r.created_at IS NOT NULL
+                                                        AND r.created_at >= :startDate
+            ORDER BY r.created_at DESC
+            """, nativeQuery = true)
+                List<Object[]> getProcessingTimesForClosedRequests(@Param("startDate") OffsetDateTime startDate);
+
+    @Query(value = """
+            SELECT
+              COALESCE(AVG(EXTRACT(EPOCH FROM (r.responded_at - r.created_at)) / 60), 0) as average_minutes,
+              COALESCE(MIN(EXTRACT(EPOCH FROM (r.responded_at - r.created_at)) / 60), 0) as min_minutes,
+              COALESCE(MAX(EXTRACT(EPOCH FROM (r.responded_at - r.created_at)) / 60), 0) as max_minutes,
+              COALESCE(PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY EXTRACT(EPOCH FROM (r.responded_at - r.created_at)) / 60), 0) as median_minutes
+            FROM requests r
+            WHERE r.status = 'CLOSED'
+              AND r.responded_at IS NOT NULL
+              AND r.created_at IS NOT NULL
+                                                        AND r.created_at >= :startDate
+            """, nativeQuery = true)
+                List<Object[]> getProcessingTimeStats(@Param("startDate") OffsetDateTime startDate);
 }

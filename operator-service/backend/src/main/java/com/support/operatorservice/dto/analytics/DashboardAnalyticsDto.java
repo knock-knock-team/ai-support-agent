@@ -7,9 +7,25 @@ public record DashboardAnalyticsDto(
         List<NameValue> byCategory,
         List<NameValue> byStatus,
         List<DailyPoint> timeSeries,
-        List<CategoryDetail> detailsByCategory
+        List<CategoryDetail> detailsByCategory,
+        ProcessingTimeMetrics processingTime
 ) {
     public record Summary(long total, long pending, long approved, long edited) {
+    }
+
+    public record ProcessingTimeMetrics(
+            long averageMinutes,
+            long minMinutes,
+            long maxMinutes,
+            long medianMinutes,
+            List<ProcessingSpeedBucket> speedDistribution
+    ) {
+    }
+
+    public record ProcessingSpeedBucket(
+            String label,
+            long count
+    ) {
     }
 
     public record NameValue(String name, long value) {

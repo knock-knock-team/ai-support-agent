@@ -10,6 +10,38 @@ const PERIOD_OPTIONS = [
   { label: '90 дней', value: 90 }
 ];
 
+const toNumberSafe = (value) => {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : 0;
+};
+
+const normalizeProcessingTime = (analytics) => {
+  const raw = analytics?.processingTime ?? analytics?.processing_time ?? {};
+  const speedDistribution = raw?.speedDistribution ?? raw?.speed_distribution ?? [];
+
+  return {
+    averageMinutes: toNumberSafe(raw?.averageMinutes ?? raw?.average_minutes),
+    minMinutes: toNumberSafe(raw?.minMinutes ?? raw?.min_minutes),
+    maxMinutes: toNumberSafe(raw?.maxMinutes ?? raw?.max_minutes),
+    medianMinutes: toNumberSafe(raw?.medianMinutes ?? raw?.median_minutes),
+    speedDistribution: Array.isArray(speedDistribution) ? speedDistribution : []
+  };
+};
+
+const formatMinutes = (minutes, { withDays = false } = {}) => {
+  const value = toNumberSafe(minutes);
+
+  if (withDays && value >= 1440) {
+    return `${(value / 1440).toFixed(1)}д`;
+  }
+
+  if (value < 60) {
+    return `${value}м`;
+  }
+
+  return `${(value / 60).toFixed(1)}ч`;
+};
+
 export default function Dashboard() {
   const [analytics, setAnalytics] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -50,6 +82,7 @@ export default function Dashboard() {
   const byStatus = analytics?.byStatus ?? [];
   const timeSeriesData = analytics?.timeSeries ?? [];
   const detailsByCategory = analytics?.detailsByCategory ?? [];
+  const processingTime = normalizeProcessingTime(analytics);
 
   const totals = useMemo(
     () => [
@@ -226,6 +259,37 @@ export default function Dashboard() {
         ))}
       </div>
 
+      {/* Карточка со временем обработки */}
+      <div className="card">
+        <h3 style={{ marginTop: 0 }}>Время обработки заявок</h3>
+        <div className="grid cols-4" style={{ gap: 16 }}>
+          <div style={{ padding: 12, backgroundColor: 'var(--background-secondary)', borderRadius: 8 }}>
+            <div className="label">Среднее</div>
+            <div style={{ fontSize: 24, fontWeight: 700, marginTop: 4 }}>
+              {formatMinutes(processingTime.averageMinutes)}
+            </div>
+          </div>
+          <div style={{ padding: 12, backgroundColor: 'var(--background-secondary)', borderRadius: 8 }}>
+            <div className="label">Минимум</div>
+            <div style={{ fontSize: 24, fontWeight: 700, marginTop: 4 }}>
+              {formatMinutes(processingTime.minMinutes)}
+            </div>
+          </div>
+          <div style={{ padding: 12, backgroundColor: 'var(--background-secondary)', borderRadius: 8 }}>
+            <div className="label">Максимум</div>
+            <div style={{ fontSize: 24, fontWeight: 700, marginTop: 4 }}>
+              {formatMinutes(processingTime.maxMinutes, { withDays: true })}
+            </div>
+          </div>
+          <div style={{ padding: 12, backgroundColor: 'var(--background-secondary)', borderRadius: 8 }}>
+            <div className="label">Медиана</div>
+            <div style={{ fontSize: 24, fontWeight: 700, marginTop: 4 }}>
+              {formatMinutes(processingTime.medianMinutes)}
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* График динамики */}
       <div className="card">
         <h3 style={{ marginTop: 0 }}>Динамика заявок</h3>
@@ -261,17 +325,32 @@ export default function Dashboard() {
         </div>
 
         <div className="card">
-          <h3 style={{ marginTop: 0 }}>Заявки по категориям</h3>
+          <h3 style={{ marginTop: 0 }}>Распределение по скорости обработки</h3>
           <div style={{ height: 260 }}>
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={byCategory}>
-                <XAxis dataKey="name" stroke="#b6c2d0" />
+              <BarChart data={processingTime.speedDistribution}>
+                <XAxis dataKey="label" stroke="#b6c2d0" />
                 <YAxis stroke="#b6c2d0" />
                 <Tooltip />
-                <Bar dataKey="value" fill="#28c4a1" radius={[8, 8, 0, 0]} />
+                <Bar dataKey="count" fill="#60a5fa" radius={[8, 8, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
+        </div>
+      </div>
+
+      {/* Заявки по категориям */}
+      <div className="card">
+        <h3 style={{ marginTop: 0 }}>Заявки по категориям</h3>
+        <div style={{ height: 260 }}>
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={byCategory}>
+              <XAxis dataKey="name" stroke="#b6c2d0" />
+              <YAxis stroke="#b6c2d0" />
+              <Tooltip />
+              <Bar dataKey="value" fill="#28c4a1" radius={[8, 8, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
         </div>
       </div>
 
