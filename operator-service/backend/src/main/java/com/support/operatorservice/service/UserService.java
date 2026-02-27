@@ -20,12 +20,12 @@ public class UserService {
     
     public User findById(Long id) {
         return userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
     }
     
     public User findByUsername(String username) {
         return userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
     }
     
     public List<User> findAll() {
@@ -53,11 +53,11 @@ public class UserService {
     @Transactional
     public User registerInitialAdmin(String username, String password, String fullName) {
         if (hasAnyUsers()) {
-            throw new RuntimeException("Initial registration is only allowed when no users exist");
+            throw new RuntimeException("Первичная регистрация разрешена только когда нет пользователей");
         }
         
         if (userRepository.existsByUsername(username)) {
-            throw new RuntimeException("Username already exists");
+            throw new RuntimeException("Имя пользователя уже существует");
         }
         
         User superAdmin = User.builder()
@@ -76,7 +76,7 @@ public class UserService {
     @Transactional
     public User createUser(String username, String password, String fullName, User.Role role) {
         if (userRepository.existsByUsername(username)) {
-            throw new RuntimeException("Username already exists");
+            throw new RuntimeException("Имя пользователя уже существует");
         }
         
         User user = User.builder()
@@ -115,12 +115,12 @@ public class UserService {
         
         // Super Admin cannot be deleted
         if (userToDelete.getSuperAdmin()) {
-            throw new RuntimeException("Cannot delete the super admin");
+            throw new RuntimeException("Невозможно удалить супер администратора");
         }
         
         Optional<User> currentUserOpt = getCurrentUser();
         if (currentUserOpt.isEmpty()) {
-            throw new RuntimeException("Unauthorized");
+            throw new RuntimeException("Не авторизован");
         }
         
         User currentUser = currentUserOpt.get();
@@ -134,13 +134,13 @@ public class UserService {
         // Regular Admin can only delete Operators, not other Admins
         if (currentUser.getRole() == User.Role.ROLE_ADMIN) {
             if (userToDelete.getRole() == User.Role.ROLE_ADMIN) {
-                throw new RuntimeException("Admins can only delete operators, not other admins");
+                throw new RuntimeException("Администраторы могут удалять только операторов, но не других администраторов");
             }
             userRepository.deleteById(id);
             return;
         }
         
         // Operators cannot delete anyone
-        throw new RuntimeException("Insufficient permissions to delete users");
+        throw new RuntimeException("Недостаточно прав для удаления пользователей");
     }
 }

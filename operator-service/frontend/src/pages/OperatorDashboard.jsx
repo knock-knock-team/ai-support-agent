@@ -35,8 +35,8 @@ export default function OperatorDashboard() {
     <div className="grid" style={{ gridTemplateColumns: '320px 1fr', gap: 20 }}>
       <div className="card" style={{ height: 'calc(100vh - 120px)', overflow: 'auto' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-          <h3 style={{ margin: 0 }}>Pending Requests</h3>
-          <span className="tag">{requests.length} items</span>
+          <h3 style={{ margin: 0 }}>Заявки в ожидании</h3>
+          <span className="tag">{requests.length} шт.</span>
         </div>
 
         <div style={{ marginTop: 16, display: 'grid', gap: 12 }}>
@@ -64,38 +64,38 @@ export default function OperatorDashboard() {
 
       <div>
         {!selected ? (
-          <div className="card">Select a request to review.</div>
+          <div className="card">Выберите заявку для просмотра.</div>
         ) : (
           <>
             <div className="card">
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <div>
-                  <div className="label">From</div>
+                  <div className="label">Отправитель</div>
                   <div>{selected.senderEmail}</div>
                 </div>
                 <div>
-                  <div className="label">Category</div>
+                  <div className="label">Категория</div>
                   <div>{selected.category}</div>
                 </div>
               </div>
               <div style={{ marginTop: 16 }}>
-                <div className="label">Subject</div>
+                <div className="label">Тема</div>
                 <div style={{ fontSize: 18, fontWeight: 600 }}>{selected.subject}</div>
               </div>
               <div style={{ marginTop: 16 }}>
-                <div className="label">Message</div>
+                <div className="label">Сообщение</div>
                 <div style={{ color: 'var(--ink-soft)', lineHeight: 1.6 }}>{selected.emailBody}</div>
               </div>
             </div>
 
             <div className="card">
-              <div className="label">AI draft</div>
+              <div className="label">Черновик AI</div>
               <div style={{ background: '#10161d', borderRadius: 12, padding: 14 }}>
                 {selected.aiGeneratedResponse}
               </div>
               <div style={{ marginTop: 16, display: 'flex', gap: 12 }}>
                 <button className="button" onClick={handleApprove}>
-                  <CheckCircle size={16} /> Approve and send
+                  <CheckCircle size={16} /> Одобрить и отправить
                 </button>
               </div>
             </div>
@@ -103,10 +103,10 @@ export default function OperatorDashboard() {
             <div className="card">
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <PencilLine size={18} />
-                <h3 style={{ margin: 0 }}>Edit response</h3>
+                <h3 style={{ margin: 0 }}>Редактировать ответ</h3>
               </div>
               <div style={{ marginTop: 12 }}>
-                <label className="label">Response</label>
+                <label className="label">Ответ</label>
                 <textarea
                   className="textarea"
                   rows={6}
@@ -115,7 +115,7 @@ export default function OperatorDashboard() {
                 />
               </div>
               <div style={{ marginTop: 12 }}>
-                <label className="label">Notes (internal)</label>
+                <label className="label">Заметки (внутренние)</label>
                 <textarea
                   className="textarea"
                   rows={3}
@@ -124,7 +124,7 @@ export default function OperatorDashboard() {
                 />
               </div>
               <button className="button" style={{ marginTop: 12 }} onClick={handleEditSend}>
-                Edit and send
+                Редактировать и отправить
               </button>
             </div>
           </>

@@ -20,7 +20,7 @@ export default function Login() {
     setError('');
 
     if (!form.username || !form.password) {
-      setError('Enter username and password');
+      setError('Введите логин и пароль');
       return;
     }
 
@@ -42,7 +42,7 @@ export default function Login() {
         navigate('/dashboard');
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Invalid credentials');
+      setError(err.response?.data?.message || 'Неверный логин или пароль');
     } finally {
       setLoading(false);
     }
@@ -64,15 +64,15 @@ export default function Login() {
     <div className="login-shell">
       <div className="card login-card">
         <div className="hero">
-          <div className="tag">Operator Console</div>
-          <h2 style={{ fontSize: 28, margin: 0 }}>Sign in</h2>
+          <div className="tag">Консоль оператора</div>
+          <h2 style={{ fontSize: 28, margin: 0 }}>Вход в систему</h2>
           <p style={{ color: 'var(--ink-soft)', margin: 0 }}>
-            Access is provisioned by admins only. No public registration.
+            Доступ предоставляется только администраторами. Без публичной регистрации.
           </p>
         </div>
 
         <form onSubmit={handleSubmit} style={{ marginTop: 24 }}>
-          <label className="label">Username</label>
+          <label className="label">Имя пользователя</label>
           <input
             className="input"
             value={form.username}
@@ -82,13 +82,13 @@ export default function Login() {
           />
 
           <div style={{ marginTop: 16 }}>
-            <label className="label">Password</label>
+            <label className="label">Пароль</label>
             <input
               type="password"
               className="input"
               value={form.password}
               onChange={(event) => setForm({ ...form, password: event.target.value })}
-              placeholder="Enter temporary password"
+              placeholder="Введите временный пароль"
               disabled={loading}
             />
           </div>
@@ -102,7 +102,7 @@ export default function Login() {
             style={{ marginTop: 20, width: '100%' }}
             disabled={loading}
           >
-            {loading ? 'Signing in...' : 'Continue'}
+            {loading ? 'Вход...' : 'Войти'}
           </button>
         </form>
       </div>

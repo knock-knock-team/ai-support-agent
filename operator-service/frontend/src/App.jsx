@@ -4,6 +4,7 @@ import ProtectedRoute from './components/ProtectedRoute.jsx';
 import Layout from './components/Layout.jsx';
 import Login from './pages/Login.jsx';
 import ChangePassword from './pages/ChangePassword.jsx';
+import Dashboard from './pages/Dashboard.jsx';
 import OperatorDashboard from './pages/OperatorDashboard.jsx';
 import AdminDashboard from './pages/AdminDashboard.jsx';
 import KnowledgeBase from './pages/KnowledgeBase.jsx';
@@ -17,6 +18,17 @@ export default function App() {
 
         <Route
           path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <Dashboard />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/operator"
           element={
             <ProtectedRoute>
               <Layout>

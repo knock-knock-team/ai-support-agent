@@ -28,7 +28,7 @@ public class DataInitializer {
                 User superAdmin = User.builder()
                         .username("admin")
                         .password(passwordEncoder.encode("admin123"))
-                        .fullName("System Administrator")
+                        .fullName("Системный Администратор")
                         .role(User.Role.ROLE_ADMIN)
                         .firstLogin(true)
                         .active(true)
@@ -36,9 +36,9 @@ public class DataInitializer {
                         .build();
 
                 userRepository.save(superAdmin);
-                log.info("✅ Super Admin created: admin/admin123 (CHANGE PASSWORD ON FIRST LOGIN!)");
+                log.info("✅ Супер Администратор создан: admin/admin123 (СМЕНИТЕ ПАРОЛЬ ПРИ ПЕРВОМ ВХОДЕ!)");
             } else {
-                log.info("ℹ️ Super Admin already exists");
+                log.info("ℹ️ Супер Администратор уже существует");
             }
         };
     }

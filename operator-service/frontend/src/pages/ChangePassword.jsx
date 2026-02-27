@@ -15,17 +15,17 @@ export default function ChangePassword() {
     setError('');
 
     if (!form.newPassword || !form.confirmPassword) {
-      setError('Fill in both password fields');
+      setError('Заполните оба поля пароля');
       return;
     }
 
     if (form.newPassword !== form.confirmPassword) {
-      setError('Passwords do not match');
+      setError('Пароли не совпадают');
       return;
     }
 
     if (form.newPassword.length < 6) {
-      setError('Password must be at least 6 characters');
+      setError('Пароль должен быть не менее 6 символов');
       return;
     }
 
@@ -43,7 +43,7 @@ export default function ChangePassword() {
 
       navigate('/dashboard');
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to change password');
+      setError(err.response?.data?.message || 'Не удалось сменить пароль');
     } finally {
       setLoading(false);
     }
@@ -53,33 +53,33 @@ export default function ChangePassword() {
     <div className="login-shell">
       <div className="card login-card">
         <div className="hero">
-          <div className="tag">First login</div>
-          <h2 style={{ fontSize: 26, margin: 0 }}>Set a new password</h2>
+          <div className="tag">Первый вход</div>
+          <h2 style={{ fontSize: 26, margin: 0 }}>Установите новый пароль</h2>
           <p style={{ color: 'var(--ink-soft)', margin: 0 }}>
-            For security, change the temporary password issued by the admin.
+            Для безопасности измените временный пароль, выданный администратором.
           </p>
         </div>
 
         <form onSubmit={handleSubmit} style={{ marginTop: 24 }}>
-          <label className="label">New password</label>
+          <label className="label">Новый пароль</label>
           <input
             type="password"
             className="input"
             value={form.newPassword}
             onChange={(event) => setForm({ ...form, newPassword: event.target.value })}
-            placeholder="Enter new password"
+            placeholder="Введите новый пароль"
             minLength={6}
             disabled={loading}
           />
 
           <div style={{ marginTop: 16 }}>
-            <label className="label">Confirm new password</label>
+            <label className="label">Подтвердите новый пароль</label>
             <input
               type="password"
               className="input"
               value={form.confirmPassword}
               onChange={(event) => setForm({ ...form, confirmPassword: event.target.value })}
-              placeholder="Confirm new password"
+              placeholder="Подтвердите новый пароль"
               minLength={6}
               disabled={loading}
             />
@@ -94,7 +94,7 @@ export default function ChangePassword() {
             style={{ marginTop: 20, width: '100%' }}
             disabled={loading}
           >
-            {loading ? 'Updating...' : 'Update password'}
+            {loading ? 'Обновление...' : 'Обновить пароль'}
           </button>
         </form>
       </div>
