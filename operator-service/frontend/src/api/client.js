@@ -40,6 +40,8 @@ export const authApi = {
 export const operatorApi = {
   getRequests: () => api.get('/operator/requests').then(res => res.data),
   getPendingRequests: () => api.get('/operator/requests/pending').then(res => res.data),
+  createRequest: (payload) => api.post('/operator/requests', payload).then(res => res.data),
+  createMockRequest: () => api.post('/operator/requests/mock').then(res => res.data),
   getRequestById: (id) => api.get(`/operator/requests/${id}`).then(res => res.data),
   approve: (id) => api.post(`/operator/requests/${id}/approve`).then(res => res.data),
   updateRequest: (id, payload) => api.put(`/operator/requests/${id}`, payload).then(res => res.data),

@@ -1,6 +1,7 @@
 package com.support.operatorservice.dto;
 
 import com.support.operatorservice.entity.Request;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,33 +15,56 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class RequestDto {
     private Long id;
-    private String subject;
-    private String userMessage;
-    private String aiResponse;
-    private Double confidence;
+    private String email;
+    private String organization;
+    private String fio;
+    private String phone;
+    @JsonProperty("device_type")
+    private String deviceType;
+    @JsonProperty("serial_number")
+    private String serialNumber;
     private String status;
     private String category;
-    private String senderEmail;
-    private String operatorResponse;
+    private String project;
+    private String inn;
+    @JsonProperty("country_region")
+    private String countryRegion;
+    @JsonProperty("confidence_score")
+    private Float confidenceScore;
+    @JsonProperty("ai_generated_answer")
+    private String aiGeneratedAnswer;
+    @JsonProperty("operator_answer")
+    private String operatorAnswer;
     private String operatorNotes;
     private UserDto operator;
+    @JsonProperty("created_at")
     private LocalDateTime createdAt;
+    @JsonProperty("updated_at")
+    private LocalDateTime updatedAt;
+    @JsonProperty("responded_at")
     private LocalDateTime respondedAt;
     
     public static RequestDto fromEntity(Request request) {
         return RequestDto.builder()
                 .id(request.getId())
-                .subject(request.getSubject())
-                .userMessage(request.getUserMessage())
-                .aiResponse(request.getAiResponse())
-                .confidence(request.getConfidence())
-                .status(request.getStatus().name())
+            .email(request.getEmail())
+            .organization(request.getOrganization())
+            .fio(request.getFio())
+            .phone(request.getPhone())
+            .deviceType(request.getDeviceType())
+            .serialNumber(request.getSerialNumber())
+            .status(request.getStatus().name().toLowerCase())
                 .category(request.getCategory() != null ? request.getCategory().name() : null)
-                .senderEmail(request.getSenderEmail())
-                .operatorResponse(request.getOperatorResponse())
+            .project(request.getProject())
+            .inn(request.getInn())
+            .countryRegion(request.getCountryRegion())
+            .confidenceScore(request.getConfidenceScore())
+            .aiGeneratedAnswer(request.getAiGeneratedAnswer())
+            .operatorAnswer(request.getOperatorAnswer())
                 .operatorNotes(request.getOperatorNotes())
                 .operator(request.getOperator() != null ? UserDto.fromEntity(request.getOperator()) : null)
                 .createdAt(request.getCreatedAt())
+            .updatedAt(request.getUpdatedAt())
                 .respondedAt(request.getRespondedAt())
                 .build();
     }

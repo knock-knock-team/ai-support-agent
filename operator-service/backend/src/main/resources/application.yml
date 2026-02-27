@@ -22,6 +22,19 @@ spring:
       mode: always
       schema-locations: classpath:schema.sql
 
+  mail:
+    host: ${SMTP_HOST:smtp.yandex.ru}
+    port: ${SMTP_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+
 server:
   port: ${SERVER_PORT:8080}
   servlet:

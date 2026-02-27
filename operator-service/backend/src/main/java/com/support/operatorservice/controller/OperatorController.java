@@ -1,5 +1,6 @@
 package com.support.operatorservice.controller;
 
+import com.support.operatorservice.dto.CreateRequestDto;
 import com.support.operatorservice.dto.RequestDto;
 import com.support.operatorservice.dto.UpdateRequestRequest;
 import com.support.operatorservice.entity.Request;
@@ -37,6 +38,18 @@ public class OperatorController {
                 .map(RequestDto::fromEntity)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(requests);
+    }
+
+    @PostMapping
+    public ResponseEntity<RequestDto> createRequest(@RequestBody CreateRequestDto payload) {
+        Request request = requestService.createRequest(payload);
+        return ResponseEntity.ok(RequestDto.fromEntity(request));
+    }
+
+    @PostMapping("/mock")
+    public ResponseEntity<RequestDto> createMockRequest() {
+        Request request = requestService.createMockRequest();
+        return ResponseEntity.ok(RequestDto.fromEntity(request));
     }
     
     @GetMapping("/{id}")

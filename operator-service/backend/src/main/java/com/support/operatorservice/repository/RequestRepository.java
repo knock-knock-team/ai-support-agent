@@ -11,6 +11,7 @@ import java.util.List;
 @Repository
 public interface RequestRepository extends JpaRepository<Request, Long> {
     List<Request> findByStatus(Request.Status status);
+    List<Request> findByStatusInOrderByCreatedAtDesc(List<Request.Status> statuses);
     List<Request> findByOperatorId(Long operatorId);
     List<Request> findByStatusOrderByCreatedAtDesc(Request.Status status);
     
