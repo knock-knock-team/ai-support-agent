@@ -15,19 +15,6 @@ const toNumberSafe = (value) => {
   return Number.isFinite(parsed) ? parsed : 0;
 };
 
-const normalizeProcessingTime = (analytics) => {
-  const raw = analytics?.processingTime ?? analytics?.processing_time ?? {};
-  const speedDistribution = raw?.speedDistribution ?? raw?.speed_distribution ?? [];
-
-  return {
-    averageMinutes: toNumberSafe(raw?.averageMinutes ?? raw?.average_minutes),
-    minMinutes: toNumberSafe(raw?.minMinutes ?? raw?.min_minutes),
-    maxMinutes: toNumberSafe(raw?.maxMinutes ?? raw?.max_minutes),
-    medianMinutes: toNumberSafe(raw?.medianMinutes ?? raw?.median_minutes),
-    speedDistribution: Array.isArray(speedDistribution) ? speedDistribution : []
-  };
-};
-
 const formatMinutes = (minutes, { withDays = false } = {}) => {
   const value = toNumberSafe(minutes);
 
@@ -82,7 +69,13 @@ export default function Dashboard() {
   const byStatus = analytics?.byStatus ?? [];
   const timeSeriesData = analytics?.timeSeries ?? [];
   const detailsByCategory = analytics?.detailsByCategory ?? [];
-  const processingTime = normalizeProcessingTime(analytics);
+  const processingTime = analytics?.processingTime ?? {
+    averageMinutes: 0,
+    minMinutes: 0,
+    maxMinutes: 0,
+    medianMinutes: 0,
+    speedDistribution: []
+  };
 
   const totals = useMemo(
     () => [
