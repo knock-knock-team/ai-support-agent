@@ -3,7 +3,8 @@ package com.support.operatorservice.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 
 @Entity
 @Table(name = "requests")
@@ -88,23 +89,28 @@ public class Request {
     private String operatorNotes;
     
     @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+    private OffsetDateTime createdAt;
     
     @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+    private OffsetDateTime updatedAt;
     
     @Column(name = "responded_at")
-    private LocalDateTime respondedAt;
+    private OffsetDateTime respondedAt;
     
     @PrePersist
     protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
+        OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
+        if (createdAt == null) {
+            createdAt = now;
+        }
+        if (updatedAt == null) {
+            updatedAt = now;
+        }
     }
     
     @PreUpdate
     protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
+        updatedAt = OffsetDateTime.now(ZoneOffset.UTC);
     }
     
     public enum Status {

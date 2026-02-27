@@ -40,6 +40,14 @@ public class OperatorController {
         return ResponseEntity.ok(requests);
     }
 
+    @GetMapping("/closed")
+    public ResponseEntity<List<RequestDto>> getClosedRequests() {
+        List<RequestDto> requests = requestService.findClosedRequests().stream()
+                .map(RequestDto::fromEntity)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(requests);
+    }
+
     @PostMapping
     public ResponseEntity<RequestDto> createRequest(@RequestBody CreateRequestDto payload) {
         Request request = requestService.createRequest(payload);

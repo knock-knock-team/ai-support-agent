@@ -7,7 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 @Data
 @Builder
@@ -38,11 +38,11 @@ public class RequestDto {
     private String operatorNotes;
     private UserDto operator;
     @JsonProperty("created_at")
-    private LocalDateTime createdAt;
+    private OffsetDateTime createdAt;
     @JsonProperty("updated_at")
-    private LocalDateTime updatedAt;
+    private OffsetDateTime updatedAt;
     @JsonProperty("responded_at")
-    private LocalDateTime respondedAt;
+    private OffsetDateTime respondedAt;
     
     public static RequestDto fromEntity(Request request) {
         return RequestDto.builder()

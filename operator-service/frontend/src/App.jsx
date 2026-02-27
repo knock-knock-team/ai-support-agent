@@ -8,6 +8,7 @@ import Dashboard from './pages/Dashboard.jsx';
 import OperatorDashboard from './pages/OperatorDashboard.jsx';
 import AdminDashboard from './pages/AdminDashboard.jsx';
 import KnowledgeBase from './pages/KnowledgeBase.jsx';
+import RequestsArchive from './pages/RequestsArchive.jsx';
 
 export default function App() {
   return (
@@ -55,6 +56,17 @@ export default function App() {
             <ProtectedRoute>
               <Layout>
                 <KnowledgeBase />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/archive"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <RequestsArchive />
               </Layout>
             </ProtectedRoute>
           }

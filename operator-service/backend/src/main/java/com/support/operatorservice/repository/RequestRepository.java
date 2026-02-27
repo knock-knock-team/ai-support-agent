@@ -5,7 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @Repository
@@ -22,5 +22,5 @@ public interface RequestRepository extends JpaRepository<Request, Long> {
     Long countByCategory(Request.Category category);
     
     @Query("SELECT r FROM Request r WHERE r.createdAt >= :startDate ORDER BY r.createdAt DESC")
-    List<Request> findRecentRequests(LocalDateTime startDate);
+    List<Request> findRecentRequests(OffsetDateTime startDate);
 }

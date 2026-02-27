@@ -1,6 +1,6 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
-import { LayoutDashboard, Users, BookOpen, LogOut, BarChart3 } from 'lucide-react';
+import { LayoutDashboard, Users, BookOpen, LogOut, BarChart3, Archive } from 'lucide-react';
 
 export default function Layout({ children }) {
   const { user, isAdmin, logout } = useAuth();
@@ -9,6 +9,7 @@ export default function Layout({ children }) {
   const navItems = [
     { path: '/dashboard', label: 'Панель аналитики', icon: BarChart3, adminOnly: false },
     { path: '/operator', label: 'Заявки', icon: LayoutDashboard, adminOnly: false },
+    { path: '/archive', label: 'Архив', icon: Archive, adminOnly: false },
     { path: '/admin', label: 'Пользователи', icon: Users, adminOnly: true },
     { path: '/knowledge-base', label: 'База знаний', icon: BookOpen, adminOnly: false }
   ];

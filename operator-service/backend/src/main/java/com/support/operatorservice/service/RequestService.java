@@ -8,7 +8,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +36,10 @@ public class RequestService {
         return requestRepository.findByStatusInOrderByCreatedAtDesc(
                 List.of(Request.Status.NEW, Request.Status.OPERATOR_REVIEW)
         );
+    }
+
+    public List<Request> findClosedRequests() {
+        return requestRepository.findByStatusOrderByCreatedAtDesc(Request.Status.CLOSED);
     }
     
     public List<Request> findByOperator(Long operatorId) {
@@ -87,6 +92,8 @@ public class RequestService {
                 .aiGeneratedAnswer(aiAnswer)
                 .operatorAnswer(operatorAnswer)
                 .status(Request.Status.NEW)
+                .createdAt(payload.getCreatedAt())
+                .updatedAt(payload.getUpdatedAt())
                 .build();
 
         if (confidence >= AUTO_SEND_THRESHOLD) {
@@ -180,7 +187,7 @@ public class RequestService {
                 answer
         );
         request.setStatus(Request.Status.CLOSED);
-        request.setRespondedAt(LocalDateTime.now());
+        request.setRespondedAt(OffsetDateTime.now(ZoneOffset.UTC));
     }
     
     public Map<String, Long> getStatsByStatus() {
@@ -200,7 +207,7 @@ public class RequestService {
     }
     
     public List<Request> getRecentRequests(int days) {
-        LocalDateTime startDate = LocalDateTime.now().minusDays(days);
+        OffsetDateTime startDate = OffsetDateTime.now(ZoneOffset.UTC).minusDays(days);
         return requestRepository.findRecentRequests(startDate);
     }
 }
