@@ -1,6 +1,6 @@
 from __future__ import annotations
 import uuid
-from typing import Any, Dict, Iterable, List
+from typing import Iterable, List
 
 from rag_system.models.schemas import Chunk, Document
 from rag_system.config import settings
@@ -22,27 +22,53 @@ class Chunker:
             chunks.extend(doc_chunks)
         return chunks
 
+    def _make_chunk_id(self, doc_id: str, chunk_index: int) -> str:
+        """Generate deterministic UUID for chunk."""
+        return str(uuid.uuid5(
+            uuid.NAMESPACE_URL,
+            f"{doc_id}_{chunk_index}"
+        ))
+
     def _chunk_text(self, doc: Document) -> List[Chunk]:
-        words = doc.text.split()  # simple tokenization
+        words = doc.text.split()
         total = len(words)
         i = 0
+
         chunk_list: List[Chunk] = []
+        chunk_index = 0
+
         while i < total:
             end = min(i + self.chunk_size, total)
+
             chunk_words = words[i:end]
             chunk_text = " ".join(chunk_words)
-            # deterministic id based on document id and chunk index
-            chunk_id = f"{doc.id}-{len(chunk_list)}"
+
+            # FIX: valid UUID for Qdrant
+            chunk_id = self._make_chunk_id(doc.id, chunk_index)
+
             metadata = {**doc.metadata}
-            metadata.update({"source_document_id": doc.id, "chunk_index": len(chunk_list)})
-            chunk = Chunk(id=chunk_id, document_id=doc.id, text=chunk_text, metadata=metadata)
+            metadata.update({
+                "source_document_id": doc.id,
+                "chunk_index": chunk_index
+            })
+
+            chunk = Chunk(
+                id=chunk_id,
+                document_id=doc.id,
+                text=chunk_text,
+                metadata=metadata
+            )
+
             chunk_list.append(chunk)
+            chunk_index += 1
 
             if end == total:
                 break
+
             i = end - self.chunk_overlap
-            # avoid infinite loop
+
             if i < 0:
                 i = 0
+
         logger.debug(f"Generated {len(chunk_list)} chunks for document {doc.id}")
         return chunk_list

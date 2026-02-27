@@ -54,17 +54,20 @@ class QdrantVectorStore(VectorStore):
         filter: Optional[Dict[str, Any]] = None,
     ) -> List[Dict[str, Any]]:
         qdrant_filter = self._build_filter(filter) if filter else None
-        logger.debug(
-            f"Searching in Qdrant top_k={top_k}, filter={filter}"
-        )
-        result = self.client.search(
+    
+        logger.debug(f"Searching in Qdrant top_k={top_k}, filter={filter}")
+    
+        result = self.client.query_points(
             collection_name=self.collection_name,
-            query_vector=query_vector,
+            query=query_vector,
             limit=top_k,
-            filter=qdrant_filter,
+            query_filter=qdrant_filter,
+            with_payload=True,
         )
+    
         output: List[Dict[str, Any]] = []
-        for hit in result:
+    
+        for hit in result.points:
             output.append(
                 {
                     "id": hit.id,
@@ -72,6 +75,7 @@ class QdrantVectorStore(VectorStore):
                     "metadata": hit.payload,
                 }
             )
+    
         return output
 
     def _build_filter(self, criteria: Dict[str, Any]) -> Filter:

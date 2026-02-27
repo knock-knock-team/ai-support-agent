@@ -13,7 +13,8 @@ QDRANT_URL (и при необходимости QDRANT_API_KEY).
 
 import os
 import sys
-from typing import List
+from typing import List, Tuple
+import hashlib
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
@@ -34,24 +35,24 @@ except ImportError as exc:
 # end of guard imports
 
 BOOK_PATHS = [
-    r"C:\Users\333\ai-support-agent\rag_system\Pushkin Aleksandr. Evgeniy Onegin - BooksCafe.Net.txt",
-    r"C:\Users\333\ai-support-agent\rag_system\Pushkin Aleksandr. Kapitanskaya dochka - BooksCafe.Net.txt",
+    r"0.txt",
+    r"1.txt",
 ]
 
 
 def read_document(path: str) -> Document:
     """Прочитать файл и вернуть Document с именем файла как id."""
     try:
-        with open(path, "r", encoding="utf-8") as f:
+        with open(path, "r", encoding="Windows-1251") as f:
             text = f.read()
     except Exception as e:
         logger.error(f"Не удалось прочитать файл {path}: {e}")
         raise
-    doc_id = os.path.splitext(os.path.basename(path))[0]
+    doc_id = hashlib.md5(path.encode()).hexdigest()
     return Document(id=doc_id, text=text, metadata={"source": doc_id})
 
 
-def build_index(collection_name: str = "test") -> (SentenceTransformerEmbedder, QdrantVectorStore):
+def build_index(collection_name: str = "test") -> Tuple[SentenceTransformerEmbedder, QdrantVectorStore]:
     """Создаёт векторное хранилище и индексирует книги.
 
     Возвращает инстансы embedder и store, чтобы их можно было
