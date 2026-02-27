@@ -49,7 +49,8 @@ export const operatorApi = {
   sendResponse: (id) => api.post(`/operator/requests/${id}/send`).then(res => res.data),
   getStatsByStatus: () => api.get('/operator/requests/stats/status').then(res => res.data),
   getStatsByCategory: () => api.get('/operator/requests/stats/category').then(res => res.data),
-  getRecentRequests: (days = 7) => api.get(`/operator/requests/recent?days=${days}`).then(res => res.data)
+  getRecentRequests: (days = 7) => api.get(`/operator/requests/recent?days=${days}`).then(res => res.data),
+  getDashboardAnalytics: (days = 30) => api.get(`/operator/analytics/dashboard?days=${days}`).then(res => res.data)
 };
 
 export const adminApi = {

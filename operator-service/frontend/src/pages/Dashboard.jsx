@@ -1,34 +1,64 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, Legend } from 'recharts';
 import { Download, FileText, FileSpreadsheet } from 'lucide-react';
-import { mockStats } from '../data/mock.js';
+import { operatorApi } from '../api/client.js';
 
 const palette = ['#28c4a1', '#f59e0b', '#60a5fa', '#ef4444'];
 
 export default function Dashboard() {
+  const [analytics, setAnalytics] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadAnalytics = async () => {
+      try {
+        setLoading(true);
+        setError('');
+        const data = await operatorApi.getDashboardAnalytics(30);
+        if (isMounted) {
+          setAnalytics(data);
+        }
+      } catch (requestError) {
+        if (isMounted) {
+          setError('Не удалось загрузить аналитику');
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadAnalytics();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const summary = analytics?.summary ?? { total: 0, pending: 0, approved: 0, edited: 0 };
+  const byCategory = analytics?.byCategory ?? [];
+  const byStatus = analytics?.byStatus ?? [];
+  const timeSeriesData = analytics?.timeSeries ?? [];
+  const detailsByCategory = analytics?.detailsByCategory ?? [];
+
   const totals = useMemo(
     () => [
-      { label: 'Всего', value: mockStats.total },
-      { label: 'В ожидании', value: mockStats.pending },
-      { label: 'Одобрено', value: mockStats.approved },
-      { label: 'Отредактировано', value: mockStats.edited }
+      { label: 'Всего', value: summary.total },
+      { label: 'В ожидании', value: summary.pending },
+      { label: 'Одобрено', value: summary.approved },
+      { label: 'Отредактировано', value: summary.edited }
     ],
-    []
+    [summary]
   );
-
-  // Данные для графика по времени (пример)
-  const timeSeriesData = [
-    { date: '01.02', заявки: 12 },
-    { date: '08.02', заявки: 19 },
-    { date: '15.02', заявки: 15 },
-    { date: '22.02', заявки: 24 },
-    { date: '27.02', заявки: 18 }
-  ];
 
   const exportToCSV = () => {
     const headers = ['Категория,Значение'];
-    const categoryRows = mockStats.byCategory.map(item => `${item.name},${item.value}`);
-    const statusRows = mockStats.byStatus.map(item => `${item.name},${item.value}`);
+    const categoryRows = byCategory.map(item => `${item.name},${item.value}`);
+    const statusRows = byStatus.map(item => `${item.name},${item.value}`);
     
     const csv = [
       'Статистика по категориям',
@@ -50,13 +80,15 @@ export default function Dashboard() {
   const exportToJSON = () => {
     const data = {
       summary: {
-        total: mockStats.total,
-        pending: mockStats.pending,
-        approved: mockStats.approved,
-        edited: mockStats.edited
+        total: summary.total,
+        pending: summary.pending,
+        approved: summary.approved,
+        edited: summary.edited
       },
-      byCategory: mockStats.byCategory,
-      byStatus: mockStats.byStatus,
+      byCategory,
+      byStatus,
+      timeSeries: timeSeriesData,
+      detailsByCategory,
       exportDate: new Date().toISOString()
     };
 
@@ -91,17 +123,17 @@ export default function Dashboard() {
         <p>Дата: ${new Date().toLocaleDateString('ru-RU')}</p>
         
         <div class="summary">
-          <div class="card"><h3>Всего</h3><p style="font-size: 24px;">${mockStats.total}</p></div>
-          <div class="card"><h3>В ожидании</h3><p style="font-size: 24px;">${mockStats.pending}</p></div>
-          <div class="card"><h3>Одобрено</h3><p style="font-size: 24px;">${mockStats.approved}</p></div>
-          <div class="card"><h3>Отредактировано</h3><p style="font-size: 24px;">${mockStats.edited}</p></div>
+          <div class="card"><h3>Всего</h3><p style="font-size: 24px;">${summary.total}</p></div>
+          <div class="card"><h3>В ожидании</h3><p style="font-size: 24px;">${summary.pending}</p></div>
+          <div class="card"><h3>Одобрено</h3><p style="font-size: 24px;">${summary.approved}</p></div>
+          <div class="card"><h3>Отредактировано</h3><p style="font-size: 24px;">${summary.edited}</p></div>
         </div>
 
         <h2>По категориям</h2>
         <table>
           <thead><tr><th>Категория</th><th>Количество</th></tr></thead>
           <tbody>
-            ${mockStats.byCategory.map(item => `<tr><td>${item.name}</td><td>${item.value}</td></tr>`).join('')}
+            ${byCategory.map(item => `<tr><td>${item.name}</td><td>${item.value}</td></tr>`).join('')}
           </tbody>
         </table>
 
@@ -109,7 +141,7 @@ export default function Dashboard() {
         <table>
           <thead><tr><th>Статус</th><th>Количество</th></tr></thead>
           <tbody>
-            ${mockStats.byStatus.map(item => `<tr><td>${item.name}</td><td>${item.value}</td></tr>`).join('')}
+            ${byStatus.map(item => `<tr><td>${item.name}</td><td>${item.value}</td></tr>`).join('')}
           </tbody>
         </table>
       </body>
@@ -122,6 +154,24 @@ export default function Dashboard() {
     link.download = `dashboard-${new Date().toISOString().split('T')[0]}.html`;
     link.click();
   };
+
+  if (loading) {
+    return (
+      <div className="card">
+        <h3 style={{ margin: 0 }}>Панель аналитики</h3>
+        <p style={{ marginTop: 8, color: 'var(--ink-soft)' }}>Загрузка данных...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="card">
+        <h3 style={{ margin: 0 }}>Панель аналитики</h3>
+        <p style={{ marginTop: 8, color: 'var(--danger)' }}>{error}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="grid" style={{ gap: 20 }}>
@@ -166,7 +216,7 @@ export default function Dashboard() {
               <YAxis stroke="#b6c2d0" />
               <Tooltip />
               <Legend />
-              <Line type="monotone" dataKey="заявки" stroke="#28c4a1" strokeWidth={2} />
+              <Line type="monotone" dataKey="requests" name="Заявки" stroke="#28c4a1" strokeWidth={2} />
             </LineChart>
           </ResponsiveContainer>
         </div>
@@ -179,8 +229,8 @@ export default function Dashboard() {
           <div style={{ height: 260 }}>
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
-                <Pie data={mockStats.byStatus} dataKey="value" nameKey="name" innerRadius={60} outerRadius={100}>
-                  {mockStats.byStatus.map((entry, index) => (
+                <Pie data={byStatus} dataKey="value" nameKey="name" innerRadius={60} outerRadius={100}>
+                  {byStatus.map((entry, index) => (
                     <Cell key={entry.name} fill={palette[index % palette.length]} />
                   ))}
                 </Pie>
@@ -194,7 +244,7 @@ export default function Dashboard() {
           <h3 style={{ marginTop: 0 }}>Заявки по категориям</h3>
           <div style={{ height: 260 }}>
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={mockStats.byCategory}>
+              <BarChart data={byCategory}>
                 <XAxis dataKey="name" stroke="#b6c2d0" />
                 <YAxis stroke="#b6c2d0" />
                 <Tooltip />
@@ -219,23 +269,21 @@ export default function Dashboard() {
             </tr>
           </thead>
           <tbody>
-            {mockStats.byCategory.map((cat) => {
-              const processed = Math.floor(cat.value * 0.85);
-              const pending = cat.value - processed;
-              const percentage = ((processed / cat.value) * 100).toFixed(1);
+            {detailsByCategory.map((cat) => {
+              const percentage = Number(cat.processingRate ?? 0);
               
               return (
-                <tr key={cat.name}>
-                  <td>{cat.name}</td>
-                  <td>{cat.value}</td>
-                  <td>{pending}</td>
-                  <td>{processed}</td>
+                <tr key={cat.category}>
+                  <td>{cat.category}</td>
+                  <td>{cat.total}</td>
+                  <td>{cat.pending}</td>
+                  <td>{cat.processed}</td>
                   <td>
                     <span style={{ 
                       color: percentage > 80 ? 'var(--accent)' : 'var(--warning)',
                       fontWeight: 600 
                     }}>
-                      {percentage}%
+                      {percentage.toFixed(1)}%
                     </span>
                   </td>
                 </tr>
