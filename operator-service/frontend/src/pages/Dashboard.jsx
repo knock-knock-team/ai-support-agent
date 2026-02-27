@@ -4,11 +4,17 @@ import { Download, FileText, FileSpreadsheet } from 'lucide-react';
 import { operatorApi } from '../api/client.js';
 
 const palette = ['#28c4a1', '#f59e0b', '#60a5fa', '#ef4444'];
+const PERIOD_OPTIONS = [
+  { label: '7 дней', value: 7 },
+  { label: '30 дней', value: 30 },
+  { label: '90 дней', value: 90 }
+];
 
 export default function Dashboard() {
   const [analytics, setAnalytics] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [selectedPeriod, setSelectedPeriod] = useState(30);
 
   useEffect(() => {
     let isMounted = true;
@@ -17,7 +23,7 @@ export default function Dashboard() {
       try {
         setLoading(true);
         setError('');
-        const data = await operatorApi.getDashboardAnalytics(30);
+        const data = await operatorApi.getDashboardAnalytics(selectedPeriod);
         if (isMounted) {
           setAnalytics(data);
         }
@@ -37,7 +43,7 @@ export default function Dashboard() {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [selectedPeriod]);
 
   const summary = analytics?.summary ?? { total: 0, pending: 0, approved: 0, edited: 0 };
   const byCategory = analytics?.byCategory ?? [];
@@ -176,14 +182,28 @@ export default function Dashboard() {
   return (
     <div className="grid" style={{ gap: 20 }}>
       {/* Заголовок с кнопками экспорта */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
         <div>
           <h2 style={{ margin: 0 }}>Панель аналитики</h2>
           <p style={{ color: 'var(--ink-soft)', margin: '4px 0 0 0' }}>
-            Статистика и метрики обработки заявок
+            Статистика и метрики обработки заявок за выбранный период
           </p>
         </div>
-        <div style={{ display: 'flex', gap: 12 }}>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+          {PERIOD_OPTIONS.map((option) => (
+            <button
+              key={option.value}
+              className={selectedPeriod === option.value ? 'button' : 'button secondary'}
+              onClick={() => setSelectedPeriod(option.value)}
+              type="button"
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+
+        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
           <button className="button secondary" onClick={exportToCSV} title="Экспорт в CSV">
             <FileSpreadsheet size={16} /> CSV
           </button>
