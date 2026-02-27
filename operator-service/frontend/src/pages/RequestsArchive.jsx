@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Archive, Filter, RefreshCw, Search, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Archive, Filter, RefreshCw, Search, ChevronLeft, ChevronRight, X, Calendar } from 'lucide-react';
 import { operatorApi } from '../api/client.js';
 
 const CATEGORY_OPTIONS = [
@@ -26,7 +26,10 @@ export default function RequestsArchive() {
   const [project, setProject] = useState('');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
+  const [tempDateFrom, setTempDateFrom] = useState('');
+  const [tempDateTo, setTempDateTo] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [selectedRequest, setSelectedRequest] = useState(null);
 
   const loadArchive = async () => {
     try {
@@ -105,6 +108,19 @@ export default function RequestsArchive() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const handleApplyDateFilter = () => {
+    setDateFrom(tempDateFrom);
+    setDateTo(tempDateTo);
+  };
+
+  const handleRowClick = (request) => {
+    setSelectedRequest(request);
+  };
+
+  const handleCloseModal = () => {
+    setSelectedRequest(null);
+  };
+
   return (
     <div className="grid" style={{ gap: 20 }}>
       <div className="card">
@@ -178,6 +194,8 @@ export default function RequestsArchive() {
                 setProject('');
                 setDateFrom('');
                 setDateTo('');
+                setTempDateFrom('');
+                setTempDateTo('');
               }}
             >
               Сбросить фильтры
@@ -188,11 +206,20 @@ export default function RequestsArchive() {
         <div className="grid cols-4" style={{ marginTop: 12 }}>
           <div>
             <label className="label">Дата от</label>
-            <input className="input" type="date" value={dateFrom} onChange={(event) => setDateFrom(event.target.value)} />
+            <input className="input" type="date" value={tempDateFrom} onChange={(event) => setTempDateFrom(event.target.value)} />
           </div>
           <div>
             <label className="label">Дата до</label>
-            <input className="input" type="date" value={dateTo} onChange={(event) => setDateTo(event.target.value)} />
+            <input className="input" type="date" value={tempDateTo} onChange={(event) => setTempDateTo(event.target.value)} />
+          </div>
+          <div style={{ display: 'flex', alignItems: 'end', gap: 8 }}>
+            <button
+              className="button"
+              style={{ width: '100%' }}
+              onClick={handleApplyDateFilter}
+            >
+              <Calendar size={16} /> Применить даты
+            </button>
           </div>
         </div>
       </div>
@@ -227,7 +254,13 @@ export default function RequestsArchive() {
               </tr>
             ) : (
               paginatedRequests.map((item) => (
-                <tr key={item.id}>
+                <tr
+                  key={item.id}
+                  onClick={() => handleRowClick(item)}
+                  style={{ cursor: 'pointer' }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(40, 196, 161, 0.08)'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                >
                   <td>{item.id}</td>
                   <td>{item.email || '—'}</td>
                   <td>{item.fio || '—'}</td>
@@ -302,6 +335,172 @@ export default function RequestsArchive() {
           >
             Следующая <ChevronRight size={16} />
           </button>
+        </div>
+      )}
+
+      {selectedRequest && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.75)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+            padding: 20
+          }}
+          onClick={handleCloseModal}
+        >
+          <div
+            className="card"
+            style={{
+              maxWidth: 800,
+              width: '100%',
+              maxHeight: '90vh',
+              overflow: 'auto',
+              position: 'relative'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+              <h2 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: 10 }}>
+                <Archive size={20} /> Заявка #{selectedRequest.id}
+              </h2>
+              <button
+                className="button secondary"
+                onClick={handleCloseModal}
+                style={{ padding: '8px 12px' }}
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <div className="grid" style={{ gap: 16 }}>
+              <div>
+                <div className="label">Статус</div>
+                <span className="tag" style={{ fontSize: 14, padding: '6px 14px' }}>{selectedRequest.status}</span>
+              </div>
+
+              <div className="grid cols-2">
+                <div>
+                  <div className="label">Email клиента</div>
+                  <div style={{ fontSize: 16 }}>{selectedRequest.email || '—'}</div>
+                </div>
+                <div>
+                  <div className="label">Категория</div>
+                  <span className="tag">{selectedRequest.category || '—'}</span>
+                </div>
+              </div>
+
+              <div className="grid cols-2">
+                <div>
+                  <div className="label">ФИО клиента</div>
+                  <div style={{ fontSize: 16 }}>{selectedRequest.fio || '—'}</div>
+                </div>
+                <div>
+                  <div className="label">Организация</div>
+                  <div style={{ fontSize: 16 }}>{selectedRequest.organization || '—'}</div>
+                </div>
+              </div>
+
+              <div className="grid cols-2">
+                <div>
+                  <div className="label">Телефон</div>
+                  <div style={{ fontSize: 16 }}>{selectedRequest.phone || '—'}</div>
+                </div>
+                <div>
+                  <div className="label">Проект</div>
+                  <div style={{ fontSize: 16 }}>{selectedRequest.project || '—'}</div>
+                </div>
+              </div>
+
+              <div className="grid cols-2">
+                <div>
+                  <div className="label">Тип устройства</div>
+                  <div style={{ fontSize: 16 }}>{selectedRequest.device_type || '—'}</div>
+                </div>
+                <div>
+                  <div className="label">Серийный номер</div>
+                  <div style={{ fontSize: 16, fontFamily: 'var(--mono)' }}>{selectedRequest.serial_number || '—'}</div>
+                </div>
+              </div>
+
+              <div className="grid cols-2">
+                <div>
+                  <div className="label">ИНН организации</div>
+                  <div style={{ fontSize: 16, fontFamily: 'var(--mono)' }}>{selectedRequest.inn || '—'}</div>
+                </div>
+                <div>
+                  <div className="label">Страна / Регион</div>
+                  <div style={{ fontSize: 16 }}>{selectedRequest.country_region || '—'}</div>
+                </div>
+              </div>
+
+              <div>
+                <div className="label">Уверенность AI</div>
+                <div style={{ fontSize: 20, fontWeight: 600, color: 'var(--accent)' }}>
+                  {((selectedRequest.confidence_score || 0) * 100).toFixed(1)}%
+                </div>
+              </div>
+
+              <div>
+                <div className="label">Ответ, сгенерированный AI</div>
+                <div
+                  style={{
+                    background: 'var(--panel-soft)',
+                    borderRadius: 12,
+                    padding: 14,
+                    lineHeight: 1.6,
+                    whiteSpace: 'pre-wrap'
+                  }}
+                >
+                  {selectedRequest.ai_generated_answer || '—'}
+                </div>
+              </div>
+
+              <div>
+                <div className="label">Финальный ответ оператора</div>
+                <div
+                  style={{
+                    background: 'var(--panel-soft)',
+                    borderRadius: 12,
+                    padding: 14,
+                    lineHeight: 1.6,
+                    whiteSpace: 'pre-wrap',
+                    border: '1px solid rgba(40, 196, 161, 0.3)'
+                  }}
+                >
+                  {selectedRequest.operator_answer || '—'}
+                </div>
+              </div>
+
+              {selectedRequest.operator && (
+                <div>
+                  <div className="label">Оператор</div>
+                  <div style={{ fontSize: 16 }}>{selectedRequest.operator.name || selectedRequest.operator.username}</div>
+                </div>
+              )}
+
+              <div className="grid cols-3">
+                <div>
+                  <div className="label">Создано</div>
+                  <div style={{ fontSize: 14 }}>{formatDate(selectedRequest.created_at)}</div>
+                </div>
+                <div>
+                  <div className="label">Обновлено</div>
+                  <div style={{ fontSize: 14 }}>{formatDate(selectedRequest.updated_at)}</div>
+                </div>
+                <div>
+                  <div className="label">Отправлено</div>
+                  <div style={{ fontSize: 14 }}>{formatDate(selectedRequest.responded_at)}</div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>
