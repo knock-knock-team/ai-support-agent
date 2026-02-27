@@ -13,6 +13,7 @@ from transformers import (
     BitsAndBytesConfig
 )
 
+import json
 # =========================================================
 # Logging
 # =========================================================
@@ -62,10 +63,27 @@ class InferenceConfig:
             top_p=1.0,
             repetition_penalty=1.0
         )
+    
+    @classmethod
+    def extraction_default(cls):
+        return cls(
+            max_new_tokens=256,
+            temperature=0.1,
+            top_p=1.0,
+            repetition_penalty=1.0
+        )
 
+def is_valid_json(text: str) -> bool:
+    try:
+        json.loads(text)
+        return True
+    except ValueError:
+        return False
+    
 class AgentGenerationProfiles:
     QA = InferenceConfig.qa_default()
     CLASSIFICATION = InferenceConfig.classification_default()
+    EXTRACTION = InferenceConfig.extraction_default()
 
 # =========================================================
 # Agent
@@ -204,6 +222,9 @@ class QwenAgent:
         elif mode == "classification":
             return self._build_classification_prompt(question, system_prompt)
 
+        elif mode == "extraction":
+            return self._build_extraction_prompt(question, system_prompt)
+        
         else:
             raise ValueError(f"Unknown mode {mode}")
 
@@ -263,6 +284,46 @@ class QwenAgent:
             tokenize=False,
             add_generation_prompt=True
         )
+
+    def _build_extraction_prompt(self, question, system_prompt=None):
+
+        system_prompt = system_prompt or (
+            "Ты — система извлечения информации из обращения пользователя.\n\n"
+            "Извлеки следующие поля из текста обращения:\n\n"
+            "1. date — дата поступления письма\n"
+            "2. fio — фамилия, имя, отчество отправителя\n"
+            "3. object — название предприятия или объекта\n"
+            "4. phone — контактный номер телефона\n"
+            "5. email — адрес электронной почты\n"
+            "6. serial_numbers — номера приборов (список строк)\n"
+            "7. device_types — тип или модель приборов (список строк)\n"
+            "8. ИНН компании — строка состоящая из чисел"
+            "9. category — Тип обращения. Один из трех вариантов: запросить кп / обращение по продукции / сервис."
+            "10. country_region — страна или регион."
+            "11. project — Название проекта (если указано неявно ответь null)."
+            "12. problem_summary — краткое описание сути обращения\n\n"
+            "Правила:\n"
+            "- Ответь только в формате JSON.\n"
+            "- Не добавляй поясняющий текст.\n"
+            "- Если информации недостаточно — оставь в поле null.\n"
+            "- problem_summary должен быть не длиннее 1 предложения.\n"
+            "- В problem_summary не указывай личные данные. Указывай только суть обращения"
+        )
+
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {
+                "role": "user",
+                "content": f"Сообщение пользователя:\n{question}"
+            }
+        ]
+
+        return self._tokenizer.apply_chat_template(
+            messages,
+            tokenize=False,
+            add_generation_prompt=True
+        )   
+    
     # =========================================================
     # Generation
     # =========================================================
@@ -284,6 +345,8 @@ class QwenAgent:
                 config = AgentGenerationProfiles.QA
             elif mode == "classification":
                 config = AgentGenerationProfiles.CLASSIFICATION
+            elif mode == "extraction":
+                config = AgentGenerationProfiles.EXTRACTION
             else:
                 raise ValueError(f"Unknown mode {mode}")
 
@@ -315,10 +378,14 @@ class QwenAgent:
 
                 generated = output_ids[0][len(inputs.input_ids[0]):]
 
-                return self._tokenizer.decode(
+                response = self._tokenizer.decode(
                     generated,
                     skip_special_tokens=True
                 ).strip()
+
+                if mode == "extraction" and not is_valid_json(response):
+                    return None
+                return response
 
             except torch.cuda.OutOfMemoryError:
                 torch.cuda.empty_cache()
