@@ -1,4 +1,5 @@
 services:
+  # Kafka infrastructure
   zookeeper:
     image: confluentinc/cp-zookeeper:7.5.0
     container_name: zookeeper
@@ -8,7 +9,7 @@ services:
     ports:
       - "2181:2181"
     networks:
-      - mail-network
+      - app-network
 
   kafka:
     image: confluentinc/cp-kafka:7.5.0
@@ -27,11 +28,12 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
     networks:
-      - mail-network
+      - app-network
 
+  # Email Service Database
   postgres:
     image: postgres:16-alpine
-    container_name: postgres
+    container_name: postgres-email
     environment:
       POSTGRES_DB: ${DB_NAME:-mail_processor}
       POSTGRES_USER: ${DB_USERNAME:-postgres}
@@ -39,18 +41,26 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - postgres-data:/var/lib/postgresql/data
+      - postgres-email-data:/var/lib/postgresql/data
     networks:
-      - mail-network
+      - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
+  # Email Processor Service
   mail-processor:
     build:
-      context: .
+      context: ./email-service
       dockerfile: Dockerfile
     container_name: mail-processor
     depends_on:
-      - kafka
-      - postgres
+      kafka:
+        condition: service_started
+      postgres:
+        condition: service_healthy
     environment:
       MAIL_HOST: ${MAIL_HOST}
       MAIL_PORT: ${MAIL_PORT}
@@ -67,12 +77,71 @@ services:
       EMAIL_POLL_INTERVAL_MS: ${EMAIL_POLL_INTERVAL_MS:-30000}
       EMAIL_BATCH_SIZE: ${EMAIL_BATCH_SIZE:-10}
     networks:
-      - mail-network
+      - app-network
+    restart: unless-stopped
+
+  # Operator Service Database
+  operator-db:
+    image: postgres:16-alpine
+    container_name: operator-db
+    environment:
+      POSTGRES_DB: ${OPERATOR_DB_NAME:-operator_service}
+      POSTGRES_USER: ${OPERATOR_DB_USERNAME:-postgres}
+      POSTGRES_PASSWORD: ${OPERATOR_DB_PASSWORD:-postgres}
+    ports:
+      - "5433:5432"
+    volumes:
+      - operator-db-data:/var/lib/postgresql/data
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Operator Service Backend
+  operator-backend:
+    build:
+      context: ./operator-service/backend
+      dockerfile: Dockerfile
+    container_name: operator-backend
+    depends_on:
+      operator-db:
+        condition: service_healthy
+    environment:
+      DB_HOST: operator-db
+      DB_PORT: 5432
+      DB_NAME: ${OPERATOR_DB_NAME:-operator_service}
+      DB_USERNAME: ${OPERATOR_DB_USERNAME:-postgres}
+      DB_PASSWORD: ${OPERATOR_DB_PASSWORD:-postgres}
+      JWT_SECRET: ${JWT_SECRET:-QE5jUmZValhuMnI1dTh4L0E/RChHK0tiUGRTZ1ZrWXA=}
+      JWT_EXPIRATION: ${JWT_EXPIRATION:-86400000}
+      SERVER_PORT: 8080
+    ports:
+      - "8080:8080"
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  # Operator Service Frontend
+  operator-frontend:
+    build:
+      context: ./operator-service/frontend
+      dockerfile: Dockerfile
+    container_name: operator-frontend
+    depends_on:
+      - operator-backend
+    ports:
+      - "3000:80"
+    networks:
+      - app-network
     restart: unless-stopped
 
 volumes:
-  postgres-data:
+  postgres-email-data:
+  operator-db-data:
 
 networks:
-  mail-network:
+  app-network:
     driver: bridge

@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  operator-db:
+    image: postgres:16-alpine
+    container_name: operator-db
+    environment:
+      POSTGRES_DB: ${OPERATOR_DB_NAME:-operator_service}
+      POSTGRES_USER: ${OPERATOR_DB_USERNAME:-postgres}
+      POSTGRES_PASSWORD: ${OPERATOR_DB_PASSWORD:-postgres}
+    ports:
+      - "5433:5432"
+    volumes:
+      - operator-db-data:/var/lib/postgresql/data
+    networks:
+      - operator-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  operator-backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: operator-backend
+    depends_on:
+      operator-db:
+        condition: service_healthy
+    environment:
+      DB_HOST: operator-db
+      DB_PORT: 5432
+      DB_NAME: ${OPERATOR_DB_NAME:-operator_service}
+      DB_USERNAME: ${OPERATOR_DB_USERNAME:-postgres}
+      DB_PASSWORD: ${OPERATOR_DB_PASSWORD:-postgres}
+      JWT_SECRET: ${JWT_SECRET:-404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
+      JWT_EXPIRATION: ${JWT_EXPIRATION:-86400000}
+      SERVER_PORT: 8080
+    ports:
+      - "8080:8080"
+    networks:
+      - operator-network
+    restart: unless-stopped
+
+  operator-frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: operator-frontend
+    depends_on:
+      - operator-backend
+    ports:
+      - "3000:80"
+    networks:
+      - operator-network
+    restart: unless-stopped
+
+volumes:
+  operator-db-data:
+
+networks:
+  operator-network:
+    driver: bridge
