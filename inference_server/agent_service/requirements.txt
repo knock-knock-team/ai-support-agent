@@ -3,3 +3,7 @@ uvicorn[standard]
 pydantic[dotenv]
 starlette
 torch
+transformers
+python-dotenv
+accelerate
+bitsandbytes
