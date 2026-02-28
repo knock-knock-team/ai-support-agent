@@ -61,3 +61,39 @@ export const adminApi = {
   deleteUser: (id) => api.delete(`/admin/users/${id}`),
   toggleUserActive: (id) => api.put(`/admin/users/${id}/toggle-active`).then(res => res.data)
 };
+
+export const knowledgeBaseApi = {
+  uploadDocument: async (file, category = 'General', tags = []) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('category', category);
+    if (tags.length > 0) {
+      formData.append('tags', tags.join(','));
+    }
+    
+    const token = localStorage.getItem('token');
+    const response = await fetch(`${apiBaseUrl}/knowledge/upload`, {
+      method: 'POST',
+      headers: {
+        'Authorization': token ? `Bearer ${token}` : ''
+      },
+      body: formData
+    });
+    
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Upload failed');
+    }
+    
+    return response.json();
+  },
+  
+  search: (payload) => api.post('/knowledge/search', payload).then(res => res.data),
+  
+  getDocuments: () => api.get('/knowledge/documents').then(res => res.data),
+  
+  deleteDocument: (documentId) => api.delete(`/knowledge/documents/${documentId}`).then(res => res.data),
+  
+  getCategories: () => api.get('/knowledge/categories').then(res => res.data)
+};
+

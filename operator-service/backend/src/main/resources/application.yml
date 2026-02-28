@@ -44,6 +44,11 @@ jwt:
   secret: ${JWT_SECRET:QE5jUmZValhuMnI1dTh4L0E/RChHK0tiUGRTZ1ZrWXA=}
   expiration: ${JWT_EXPIRATION:86400000}
 
+qdrant:
+  url: ${QDRANT_URL:https://88b17aa3-99ab-438b-b3ac-895a83e153ce.eu-central-1-0.aws.cloud.qdrant.io}
+  api-key: ${QDRANT_API_KEY:}
+  collection-name: knowledge_base
+
 logging:
   level:
     com.support.operatorservice: INFO

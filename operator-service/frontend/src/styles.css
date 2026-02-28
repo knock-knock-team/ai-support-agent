@@ -245,3 +245,54 @@ button {
     transform: translateY(0);
   }
 }
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease;
+}
+
+.modal-content {
+  background: var(--panel);
+  border-radius: var(--radius);
+  padding: 28px 32px;
+  max-width: 560px;
+  width: 90vw;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 20px 80px rgba(0, 0, 0, 0.6);
+  animation: modalSlide 0.3s ease;
+}
+
+.modal-content h2 {
+  margin: 0 0 16px;
+  font-size: 22px;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modalSlide {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
