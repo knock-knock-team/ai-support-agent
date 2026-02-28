@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from typing import Optional, Dict, Any
 
 from dotenv import load_dotenv
+import torch.nn.functional as F
 from transformers import (
     AutoTokenizer,
     AutoModelForCausalLM,
@@ -50,7 +51,7 @@ class InferenceConfig:
     def qa_default(cls):
         return cls(
             max_new_tokens=512,
-            temperature=0.6,
+            temperature=0.2,
             top_p=1.0,
             repetition_penalty=1.1
         )
@@ -59,7 +60,7 @@ class InferenceConfig:
     def classification_default(cls):
         return cls(
             max_new_tokens=10,
-            temperature=0.1,
+            temperature=0.01,
             top_p=1.0,
             repetition_penalty=1.0
         )
@@ -68,17 +69,10 @@ class InferenceConfig:
     def extraction_default(cls):
         return cls(
             max_new_tokens=256,
-            temperature=0.1,
+            temperature=0.01,
             top_p=1.0,
             repetition_penalty=1.0
         )
-
-def is_valid_json(text: str) -> bool:
-    try:
-        json.loads(text)
-        return True
-    except ValueError:
-        return False
     
 class AgentGenerationProfiles:
     QA = InferenceConfig.qa_default()
@@ -122,6 +116,13 @@ class QwenAgent:
     # Utilities
     # =========================================================
 
+    def _is_valid_json(self, text: str) -> bool:
+        try:
+            json.loads(text)
+            return True
+        except ValueError:
+            return False
+    
     def _truncate_context(self, text: str) -> str:
         if not text:
             return ""
@@ -141,7 +142,64 @@ class QwenAgent:
             bnb_4bit_compute_dtype=torch.bfloat16,
             bnb_4bit_use_double_quant=True,
         )
+    
+    @staticmethod
+    def compute_confidence(inputs, output):
 
+        log_probs = []
+
+        prompt_len = inputs.input_ids.shape[1]
+
+        for step, step_scores in enumerate(output.scores):
+            probs = F.log_softmax(step_scores, dim=-1)
+
+            token_id = output.sequences[0][prompt_len + step]
+
+            log_prob = probs[0, token_id]
+            log_probs.append(log_prob)
+
+        if not log_probs:
+            return 0.0
+
+        confidence = round(torch.exp(torch.mean(torch.stack(log_probs))).item(), 2)
+
+        return confidence
+    
+    def extraction_structure_score(self, response):
+
+        if not self._is_valid_json(response):
+            return None
+
+        try:
+            data = json.loads(response)
+        except:
+            return 0.0
+
+        total_fields = len(data)
+
+        if total_fields == 0:
+            return 0.0
+
+        filled = sum(
+            1 for v in data.values()
+            if v not in [None, "", [], {}, "null"]
+        )
+
+        return filled / total_fields
+
+    def compute_extraction_confidence(self, inputs, output, response):
+
+        structure_score = self.extraction_structure_score(response)
+
+        generation_score = self.compute_confidence(inputs, output)
+
+        confidence = (
+            0.4 * structure_score +
+            0.6 * generation_score
+        )
+
+        return round(confidence, 2)
+    
     # =========================================================
     # Model Lifecycle
     # =========================================================
@@ -203,7 +261,7 @@ class QwenAgent:
                 raise RuntimeError(str(e))
 
     # =========================================================
-    # Prompt Builder (Russian prompts)
+    # Prompt Builder
     # =========================================================
 
     def _build_prompt(
@@ -363,7 +421,7 @@ class QwenAgent:
                 ).to(self._model.device)
 
                 with torch.inference_mode():
-                    output_ids = self._model.generate(
+                    output = self._model.generate(
                         **inputs,
                         max_new_tokens=config.max_new_tokens,
                         temperature=config.temperature,
@@ -371,18 +429,31 @@ class QwenAgent:
                         repetition_penalty=config.repetition_penalty,
                         pad_token_id=self._tokenizer.pad_token_id,
                         eos_token_id=self._tokenizer.eos_token_id,
+                        output_scores=True,
+                        return_dict_in_generate=True
                     )
 
-                generated = output_ids[0][len(inputs.input_ids[0]):]
+                generated = output.sequences[0][len(inputs.input_ids[0]):]
 
                 response = self._tokenizer.decode(
                     generated,
                     skip_special_tokens=True
                 ).strip()
 
-                if mode == "extraction" and not is_valid_json(response):
-                    return None
-                return response
+                confidence = None
+
+                if mode == "qa" or mode == "classification":
+                    confidence = self.compute_confidence(inputs, output)
+
+                elif mode == "extraction":
+                    confidence = self.compute_extraction_confidence(inputs, output, response)
+                    if not confidence:
+                        return None
+                
+                return {
+                    "response": response,
+                    "confidence": confidence
+                }
 
             except torch.cuda.OutOfMemoryError:
                 torch.cuda.empty_cache()
