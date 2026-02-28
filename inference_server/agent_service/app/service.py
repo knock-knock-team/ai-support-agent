@@ -7,6 +7,9 @@ from anyio import to_thread
 from .config import settings
 from agent.qwen_agent import QwenAgent, ModelConfig, InferenceConfig, ServiceConfig
 
+# bring in the existing sentiment helper
+from agent.sentiment_classification import SentimentService, SentimentInferenceConfig, SentimentModelConfig, SentimentServiceConfig
+
 
 class AgentService:
     def __init__(self) -> None:
@@ -24,6 +27,15 @@ class AgentService:
             service_config=service_conf,
         )
 
+        # sentiment classifier lives separately; lazy loading handled inside
+        sentiment_device = None  # let SentimentService pick cuda/cpu same as its own logic
+        self._sentiment = SentimentService(
+            device=sentiment_device,
+            model_config=SentimentModelConfig(),
+            inference_config=SentimentInferenceConfig(),
+            service_config=SentimentServiceConfig(),
+        )
+
     async def generate(self, message: str, context: Optional[str] = None) -> Dict[str, Any]:
         try:
             # the underlying call is CPU/GPU heavy so run in a thread
@@ -33,7 +45,20 @@ class AgentService:
         except Exception as exc:
             raise HTTPException(status_code=500, detail=str(exc))
 
+    async def sentiment(self, text: str, return_proba: bool = False) -> Dict[str, Any]:
+        """Run sentiment classification for provided text."""
+        try:
+            result = await to_thread.run_sync(self._sentiment.predict, text, return_proba)
+            return result
+        except Exception as exc:
+            raise HTTPException(status_code=500, detail=str(exc))
+
     async def health(self) -> dict:
         # model loading can happen lazily
-        info = await to_thread.run_sync(self._agent.health_check)
-        return info
+        agent_info = await to_thread.run_sync(self._agent.health_check)
+        sentiment_info = {}
+        try:
+            sentiment_info = await to_thread.run_sync(self._sentiment.health_check)
+        except Exception:
+            sentiment_info = {"error": "unavailable"}
+        return {"agent": agent_info, "sentiment": sentiment_info}

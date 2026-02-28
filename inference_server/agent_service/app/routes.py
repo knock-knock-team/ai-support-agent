@@ -1,7 +1,13 @@
 from __future__ import annotations
 from fastapi import APIRouter, Depends, HTTPException, Request
 
-from .schemas import GenerateRequest, GenerateResponse, HealthResponse
+from .schemas import (
+    GenerateRequest,
+    GenerateResponse,
+    HealthResponse,
+    SentimentRequest,
+    SentimentResponse,
+)
 from .service import AgentService
 
 router = APIRouter()
@@ -23,3 +29,13 @@ async def generate(request: GenerateRequest, svc: AgentService = Depends(get_ser
 async def health(svc: AgentService = Depends(get_service)) -> HealthResponse:
     info = await svc.health()
     return HealthResponse(status="ok", details=info)
+
+
+@router.post("/sentiment", response_model=SentimentResponse)
+async def sentiment(
+    request: SentimentRequest,
+    svc: AgentService = Depends(get_service),
+) -> SentimentResponse:
+    result = await svc.sentiment(request.text, request.return_proba)
+    # SentimentService already returns keys label, class_id and optionally sentiment_confidence
+    return SentimentResponse(**result)
