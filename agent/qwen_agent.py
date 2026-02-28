@@ -51,7 +51,7 @@ class InferenceConfig:
         return cls(
             max_new_tokens=512,
             temperature=0.6,
-            top_p=0.9,
+            top_p=1.0,
             repetition_penalty=1.1
         )
 
@@ -100,7 +100,6 @@ class QwenAgent:
         cache_dir: Optional[str] = None,
         device: Optional[str] = None,
         model_config: Optional[ModelConfig] = None,
-        # inference_config: Optional[InferenceConfig] = None,
         service_config: Optional[ServiceConfig] = None
     ):
         load_dotenv()
@@ -115,7 +114,6 @@ class QwenAgent:
         )
 
         self.model_config = model_config or ModelConfig()
-        # self.inference_config = inference_config or InferenceConfig()
         self.service_config = service_config or ServiceConfig()
 
         self._loaded = False
@@ -288,24 +286,25 @@ class QwenAgent:
     def _build_extraction_prompt(self, question, system_prompt=None):
 
         system_prompt = system_prompt or (
-            """Ты — система извлечения информации из обращения пользователя.
-
-        Извлеки следующие поля из текста обращения:
-
-        1. date — дата поступления письма
-        2. fio — фамилия, имя, отчество отправителя
-        3. object — название предприятия или объекта
-        4. phone — контактный номер телефона
-        5. email — адрес электронной почты
-        6. serial_numbers — номера приборов (список строк)
-        7. device_types — тип или модель приборов (список строк)
-        8. problem_summary — краткое описание сути обращения
-
-        Правила:
-        - Ответь только в формате JSON.
-        - Не добавляй поясняющий текст.
-        - Если информации недостаточно — оставь в поле null.
-        - problem_summary должен быть не длиннее 1 предложения."""
+            "Ты — система извлечения информации из обращения пользователя.\n"
+            "\n"
+            "Извлеки следующие поля из текста обращения:\n"
+            "\n"
+            "1. date — дата поступления письма\n"
+            "2. fio — фамилия, имя, отчество отправителя\n"
+            "3. object — название предприятия или объекта\n"
+            "4. phone — контактный номер телефона\n"
+            "5. email — адрес электронной почты\n"
+            "6. serial_numbers — номера приборов (список строк)\n"
+            "7. device_types — тип или модель приборов (список строк)\n"
+            "8. problem_summary — краткое описание сути обращения\n"
+            "\n"
+            "Правила:\n"
+            "- Ответь только в формате JSON.\n"
+            "- Не добавляй поясняющий текст.\n"
+            "- Если информации недостаточно — оставь в поле null.\n"
+            "- problem_summary должен быть не длиннее 1 предложения.\n"
+            "- В problem_summary не указывай личные данные. Указывай только суть обращения."
         )
 
         messages = [
