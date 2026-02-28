@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Archive, Filter, RefreshCw, Search, ChevronLeft, ChevronRight, X, Calendar } from 'lucide-react';
+import { Archive, Filter, RefreshCw, Search, ChevronLeft, ChevronRight, X, Calendar, Download, FileText, FileSpreadsheet } from 'lucide-react';
 import { operatorApi } from '../api/client.js';
 
 const CATEGORY_OPTIONS = [
@@ -117,6 +117,112 @@ export default function RequestsArchive() {
     setSelectedRequest(request);
   };
 
+  const exportToCSV = () => {
+    if (filteredRequests.length === 0) {
+      alert('Нет данных для экспорта');
+      return;
+    }
+
+    const headers = [
+      'ID', 'Email', 'ФИО', 'Организация', 'Телефон', 'Категория', 'Проект',
+      'Тип устройства', 'Серийный номер', 'ИНН', 'Страна/Регион',
+      'Уверенность AI', 'Исходный вопрос', 'Ответ AI', 'Ответ оператора', 'Заметки',
+      'Статус', 'Оператор', 'Создано', 'Обновлено', 'Отправлено'
+    ];
+
+    const rows = filteredRequests.map((item) => [
+      item.id,
+      item.email || '',
+      item.fio || '',
+      item.organization || '',
+      item.phone || '',
+      item.category || '',
+      item.project || '',
+      item.device_type || '',
+      item.serial_number || '',
+      item.inn || '',
+      item.country_region || '',
+      (item.confidence_score || 0) * 100,
+      item.user_message || '',
+      item.ai_generated_answer || '',
+      item.operator_answer || '',
+      item.operator_notes || '',
+      item.status || '',
+      item.operator?.username || item.operator?.name || '',
+      formatDate(item.created_at),
+      formatDate(item.updated_at),
+      formatDate(item.responded_at)
+    ]);
+
+    const csv = [
+      headers.map(h => `"${h}"`).join(','),
+      ...rows.map(row => row.map(cell => {
+        const str = String(cell || '').replace(/"/g, '""');
+        return `"${str}"`;
+      }).join(','))
+    ].join('\n');
+
+    const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `archive-${new Date().toISOString().split('T')[0]}.csv`;
+    link.click();
+  };
+
+  const exportToExcel = () => {
+    if (filteredRequests.length === 0) {
+      alert('Нет данных для экспорта');
+      return;
+    }
+
+    const headers = [
+      'ID', 'Email', 'ФИО', 'Организация', 'Телефон', 'Категория', 'Проект',
+      'Тип устройства', 'Серийный номер', 'ИНН', 'Страна/Регион',
+      'Уверенность AI', 'Исходный вопрос', 'Ответ AI', 'Ответ оператора', 'Заметки',
+      'Статус', 'Оператор', 'Создано', 'Обновлено', 'Отправлено'
+    ];
+
+    let html = '<table border="1"><thead><tr>';
+    headers.forEach(h => {
+      html += `<th style="background:#28c4a1;color:white;padding:10px;text-align:left;font-weight:bold;">${h}</th>`;
+    });
+    html += '</tr></thead><tbody>';
+
+    filteredRequests.forEach((item, idx) => {
+      const bgColor = idx % 2 === 0 ? '#ffffff' : '#f5f5f5';
+      html += `<tr style="background:${bgColor};">`;
+      html += `<td style="padding:8px;border:1px solid #ddd;">${item.id}</td>`;
+      html += `<td style="padding:8px;border:1px solid #ddd;">${item.email || ''}</td>`;
+      html += `<td style="padding:8px;border:1px solid #ddd;">${item.fio || ''}</td>`;
+      html += `<td style="padding:8px;border:1px solid #ddd;">${item.organization || ''}</td>`;
+      html += `<td style="padding:8px;border:1px solid #ddd;">${item.phone || ''}</td>`;
+      html += `<td style="padding:8px;border:1px solid #ddd;">${item.category || ''}</td>`;
+      html += `<td style="padding:8px;border:1px solid #ddd;">${item.project || ''}</td>`;
+      html += `<td style="padding:8px;border:1px solid #ddd;">${item.device_type || ''}</td>`;
+      html += `<td style="padding:8px;border:1px solid #ddd;">${item.serial_number || ''}</td>`;
+      html += `<td style="padding:8px;border:1px solid #ddd;">${item.inn || ''}</td>`;
+      html += `<td style="padding:8px;border:1px solid #ddd;">${item.country_region || ''}</td>`;
+      html += `<td style="padding:8px;border:1px solid #ddd;text-align:right;">${((item.confidence_score || 0) * 100).toFixed(1)}%</td>`;
+      html += `<td style="padding:8px;border:1px solid #ddd;">${(item.user_message || '').substring(0, 50)}</td>`;
+      html += `<td style="padding:8px;border:1px solid #ddd;">${(item.ai_generated_answer || '').substring(0, 50)}</td>`;
+      html += `<td style="padding:8px;border:1px solid #ddd;">${(item.operator_answer || '').substring(0, 50)}</td>`;
+      html += `<td style="padding:8px;border:1px solid #ddd;">${item.operator_notes || ''}</td>`;
+      html += `<td style="padding:8px;border:1px solid #ddd;">${item.status || ''}</td>`;
+      html += `<td style="padding:8px;border:1px solid #ddd;">${item.operator?.username || item.operator?.name || ''}</td>`;
+      html += `<td style="padding:8px;border:1px solid #ddd;">${formatDate(item.created_at)}</td>`;
+      html += `<td style="padding:8px;border:1px solid #ddd;">${formatDate(item.updated_at)}</td>`;
+      html += `<td style="padding:8px;border:1px solid #ddd;">${formatDate(item.responded_at)}</td>`;
+      html += '</tr>';
+    });
+    html += '</tbody></table>';
+
+    const blob = new Blob([html], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `archive-${new Date().toISOString().split('T')[0]}.xls`;
+    link.click();
+  };
+
   const handleCloseModal = () => {
     setSelectedRequest(null);
   };
@@ -134,9 +240,17 @@ export default function RequestsArchive() {
               {totalPages > 0 && <> · Страница: <span className="tag">{currentPage} из {totalPages}</span></>}
             </div>
           </div>
-          <button className="button secondary" onClick={loadArchive}>
-            <RefreshCw size={16} /> Обновить
-          </button>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button className="button secondary" onClick={loadArchive}>
+              <RefreshCw size={16} /> Обновить
+            </button>
+            <button className="button secondary" onClick={exportToCSV} title="Экспорт в CSV">
+              <FileText size={16} /> CSV
+            </button>
+            <button className="button secondary" onClick={exportToExcel} title="Экспорт в Excel">
+              <FileSpreadsheet size={16} /> Excel
+            </button>
+          </div>
         </div>
       </div>
 
