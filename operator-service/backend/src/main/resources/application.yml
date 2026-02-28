@@ -1,0 +1,51 @@
+spring:
+  application:
+    name: operator-service
+  
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:operator_service}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+  
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+  
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema.sql
+
+  mail:
+    host: ${SMTP_HOST:smtp.yandex.ru}
+    port: ${SMTP_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+
+server:
+  port: ${SERVER_PORT:8080}
+  servlet:
+    context-path: /
+
+jwt:
+  secret: ${JWT_SECRET:QE5jUmZValhuMnI1dTh4L0E/RChHK0tiUGRTZ1ZrWXA=}
+  expiration: ${JWT_EXPIRATION:86400000}
+
+logging:
+  level:
+    com.support.operatorservice: INFO
+    org.springframework.security: DEBUG
+    org.hibernate.SQL: DEBUG
