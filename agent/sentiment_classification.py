@@ -156,10 +156,12 @@ class SentimentService:
                 }
 
                 if return_proba:
-                    result["probabilities"] = {
+                    probabilities = {
                         label_map[i]: float(probs[0][i])
                         for i in range(len(label_map))
                     }
+                    # Находим метку с максимальной вероятностью
+                    result["confidence"] = round(max(probabilities.values()), 2)
 
                 return result
 
