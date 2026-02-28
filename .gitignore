@@ -42,3 +42,4 @@ build/
 
 ### Data ###
 *.docx
+agent/openvino_model/
