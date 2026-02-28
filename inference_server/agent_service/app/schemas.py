@@ -16,3 +16,18 @@ class GenerateResponse(BaseModel):
 class HealthResponse(BaseModel):
     status: str
     details: dict
+
+
+# ---- sentiment-specific models -------------------------------------------
+
+class SentimentRequest(BaseModel):
+    text: str = Field(..., description="Text to classify")
+    return_proba: bool = Field(False, description="Whether to return probability scores")
+
+
+class SentimentResponse(BaseModel):
+    label: str
+    class_id: int
+    sentiment_confidence: Optional[float] = Field(
+        None, description="Highest class probability when return_proba is True"
+    )

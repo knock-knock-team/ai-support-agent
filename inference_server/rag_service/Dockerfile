@@ -11,7 +11,7 @@ RUN pip install -r requirements.txt
 
 COPY rag_system ./rag_system
 COPY inference_server/rag_service ./inference_server/rag_service
-COPY all-MiniLM-L6-v2 ./all-MiniLM-L6-v2
+COPY models/all-MiniLM-L6-v2 ./all-MiniLM-L6-v2
 
 EXPOSE 8002
 
