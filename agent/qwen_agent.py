@@ -191,6 +191,9 @@ class QwenAgent:
 
         structure_score = self.extraction_structure_score(response)
 
+        if structure_score is None:
+            return None
+        
         generation_score = self.compute_confidence(inputs, output)
 
         confidence = (
