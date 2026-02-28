@@ -116,6 +116,7 @@
 | status              |          enum | Статус обращения (new, ai_generated, operator_review, closed) |
 | ai_generated_answer |          text | Текст ответа, сгенерированный AI                              |
 | operator_answer     |          text | Версия ответа оператора                                       |
+| is_form     |          text | Получена ли заявка из формы                                       |
 | created_at          |   timestamptz | Дата создания                                                 |
 | updated_at          |   timestamptz | Дата обновления                                               |
 
