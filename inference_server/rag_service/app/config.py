@@ -1,6 +1,26 @@
-from __future__ import annotations
+# pydantic v2 splits BaseSettings into pydantic-settings
+from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import Field
 
-from rag_system.config import settings as core_settings
+_env_path = '.env'
 
-# re-export configuration expected by the service
-settings = core_settings
+class Settings(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_file=_env_path if _env_path else ".env",
+        env_file_encoding="utf-8"
+    )
+    
+    # optional during tests; real code should set via environment
+    qdrant_url: str | None = Field(None, env="QDRANT_URL")
+    qdrant_api_key: str | None = Field(None, env="QDRANT_API_KEY")
+    embedding_model: str = Field("BAAI/bge-small-en-v1.5", env="EMBEDDING_MODEL")
+    embedding_model_onnx: str = Field("all-MiniLM-L6-v2/onnx/model.onnx", env="EMBEDDING_MODEL_ONNX")
+    embedding_model_onnx_tokenizer: str = Field("all-MiniLM-L6-v2/tokenizer.json", env="EMBEDDING_MODEL_ONNX_TOKENIZER")
+
+    chunk_size: int = Field(500, env="CHUNK_SIZE")
+    chunk_overlap: int = Field(50, env="CHUNK_OVERLAP")
+
+    default_top_k: int = Field(5, env="DEFAULT_TOP_K")
+
+
+settings = Settings()

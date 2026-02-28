@@ -14,6 +14,8 @@ class Settings(BaseSettings):
     qdrant_url: str | None = Field(None, env="QDRANT_URL")
     qdrant_api_key: str | None = Field(None, env="QDRANT_API_KEY")
     embedding_model: str = Field("BAAI/bge-small-en-v1.5", env="EMBEDDING_MODEL")
+    embedding_model_onnx: str = Field("all-MiniLM-L6-v2/onnx/model.onnx", env="EMBEDDING_MODEL_ONNX")
+    embedding_model_onnx_tokenizer: str = Field("all-MiniLM-L6-v2/tokenizer.json", env="EMBEDDING_MODEL_ONNX_TOKENIZER")
 
     chunk_size: int = Field(500, env="CHUNK_SIZE")
     chunk_overlap: int = Field(50, env="CHUNK_OVERLAP")
