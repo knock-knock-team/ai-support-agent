@@ -20,4 +20,4 @@ COPY all-MiniLM-L6-v2 ./all-MiniLM-L6-v2
 
 EXPOSE 8002
 
-CMD ["uvicorn", "inference_server.rag_service.app.main:app", "--host", "0.0.0.0", "--port", "8002", "--workers", "1"]
+CMD ["uvicorn", "inference_server.rag_service.app.main:app", "--host", "0.0.0.0", "--port", "8002", "--loop", "uvloop", "--workers", "1"]
