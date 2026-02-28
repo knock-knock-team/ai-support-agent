@@ -33,4 +33,8 @@ public class CreateRequestDto {
     private OffsetDateTime createdAt;
     @JsonProperty("updated_at")
     private OffsetDateTime updatedAt;
+    @JsonProperty("is_form")
+    private Boolean isForm;
+    @JsonProperty("user_message")
+    private String userMessage;
 }

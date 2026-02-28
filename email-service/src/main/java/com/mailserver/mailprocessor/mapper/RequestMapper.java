@@ -37,6 +37,7 @@ public class RequestMapper {
                 .emailSubject(dto.getEmailSubject())
                 .emailBody(dto.getEmailBody())
                 .rawEmailContent(dto.getRawEmailContent())
+                .isForm(dto.getIsForm() != null ? dto.getIsForm() : false)
                 .createdAt(dto.getCreatedAt())
                 .updatedAt(dto.getUpdatedAt())
                 .build();
@@ -72,6 +73,7 @@ public class RequestMapper {
                 .emailSubject(entity.getEmailSubject())
                 .emailBody(entity.getEmailBody())
                 .rawEmailContent(entity.getRawEmailContent())
+                .isForm(entity.getIsForm())
                 .createdAt(entity.getCreatedAt())
                 .updatedAt(entity.getUpdatedAt())
                 .build();

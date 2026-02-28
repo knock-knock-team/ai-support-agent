@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { CheckCircle, PencilLine } from 'lucide-react';
+import { CheckCircle, PencilLine, FileText, Mail } from 'lucide-react';
 import { operatorApi } from '../api/client.js';
 
 export default function OperatorDashboard() {
@@ -136,11 +136,17 @@ export default function OperatorDashboard() {
                 borderColor: item.id === selectedId ? 'rgba(40,196,161,0.6)' : undefined
               }}
             >
-              <div style={{ fontSize: 13, color: 'var(--ink-soft)' }}>{item.email}</div>
+              <div style={{ fontSize: 13, color: 'var(--ink-soft)', display: 'flex', alignItems: 'center', gap: 6 }}>
+                {item.is_form ? <FileText size={14} /> : <Mail size={14} />}
+                {item.email}
+              </div>
               <div style={{ fontWeight: 600 }}>{item.project || item.organization || 'Без проекта'}</div>
               <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
                 <span className="tag">{item.category}</span>
                 <span className="tag">AI {((item.confidence_score || 0) * 100).toFixed(0)}%</span>
+                <span className="tag" style={{ background: item.is_form ? 'rgba(100,150,255,0.15)' : 'rgba(255,150,100,0.15)' }}>
+                  {item.is_form ? 'Форма' : 'Email'}
+                </span>
               </div>
             </button>
           ))}

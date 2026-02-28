@@ -29,6 +29,7 @@ public class EmailParserService {
                 .emailSubject(subject)
                 .emailBody(bodyText)
                 .email(extractEmail(from, bodyText))
+                .isForm(false)  // Email-originated requests are not from form
                 .build();
 
         // Parse fields from email body

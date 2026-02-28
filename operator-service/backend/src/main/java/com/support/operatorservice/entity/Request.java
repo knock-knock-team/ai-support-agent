@@ -97,6 +97,10 @@ public class Request {
     @Column(name = "responded_at")
     private OffsetDateTime respondedAt;
     
+    @Column(name = "is_form")
+    @Builder.Default
+    private Boolean isForm = false;
+    
     @PrePersist
     protected void onCreate() {
         OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);

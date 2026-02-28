@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Archive, Filter, RefreshCw, Search, ChevronLeft, ChevronRight, X, Calendar, Download, FileText, FileSpreadsheet } from 'lucide-react';
+import { Archive, Filter, RefreshCw, Search, ChevronLeft, ChevronRight, X, Calendar, Download, FileText, FileSpreadsheet, Mail } from 'lucide-react';
 import { operatorApi } from '../api/client.js';
 
 const CATEGORY_OPTIONS = [
@@ -124,7 +124,7 @@ export default function RequestsArchive() {
     }
 
     const headers = [
-      'ID', 'Email', 'ФИО', 'Организация', 'Телефон', 'Категория', 'Проект',
+      'ID', 'Источник', 'Email', 'ФИО', 'Организация', 'Телефон', 'Категория', 'Проект',
       'Тип устройства', 'Серийный номер', 'ИНН', 'Страна/Регион',
       'Уверенность AI', 'Исходный вопрос', 'Ответ AI', 'Ответ оператора', 'Заметки',
       'Статус', 'Оператор', 'Создано', 'Обновлено', 'Отправлено'
@@ -132,6 +132,7 @@ export default function RequestsArchive() {
 
     const rows = filteredRequests.map((item) => [
       item.id,
+      item.is_form ? 'Форма' : 'Email',
       item.email || '',
       item.fio || '',
       item.organization || '',
@@ -176,7 +177,7 @@ export default function RequestsArchive() {
     }
 
     const headers = [
-      'ID', 'Email', 'ФИО', 'Организация', 'Телефон', 'Категория', 'Проект',
+      'ID', 'Источник', 'Email', 'ФИО', 'Организация', 'Телефон', 'Категория', 'Проект',
       'Тип устройства', 'Серийный номер', 'ИНН', 'Страна/Регион',
       'Уверенность AI', 'Исходный вопрос', 'Ответ AI', 'Ответ оператора', 'Заметки',
       'Статус', 'Оператор', 'Создано', 'Обновлено', 'Отправлено'
@@ -192,6 +193,7 @@ export default function RequestsArchive() {
       const bgColor = idx % 2 === 0 ? '#ffffff' : '#f5f5f5';
       html += `<tr style="background:${bgColor};">`;
       html += `<td style="padding:8px;border:1px solid #ddd;">${item.id}</td>`;
+      html += `<td style="padding:8px;border:1px solid #ddd;">${item.is_form ? 'Форма' : 'Email'}</td>`;
       html += `<td style="padding:8px;border:1px solid #ddd;">${item.email || ''}</td>`;
       html += `<td style="padding:8px;border:1px solid #ddd;">${item.fio || ''}</td>`;
       html += `<td style="padding:8px;border:1px solid #ddd;">${item.organization || ''}</td>`;
@@ -343,6 +345,7 @@ export default function RequestsArchive() {
           <thead>
             <tr>
               <th>ID</th>
+              <th>Источник</th>
               <th>Email</th>
               <th>Клиент</th>
               <th>Организация</th>
@@ -356,13 +359,13 @@ export default function RequestsArchive() {
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={9} style={{ color: 'var(--ink-soft)' }}>
+                <td colSpan={10} style={{ color: 'var(--ink-soft)' }}>
                   Загрузка...
                 </td>
               </tr>
             ) : filteredRequests.length === 0 ? (
               <tr>
-                <td colSpan={9} style={{ color: 'var(--ink-soft)' }}>
+                <td colSpan={10} style={{ color: 'var(--ink-soft)' }}>
                   По текущим фильтрам ничего не найдено
                 </td>
               </tr>
@@ -376,6 +379,14 @@ export default function RequestsArchive() {
                   onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                 >
                   <td>{item.id}</td>
+                  <td>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      {item.is_form ? <FileText size={14} /> : <Mail size={14} />}
+                      <span className="tag" style={{ background: item.is_form ? 'rgba(100,150,255,0.15)' : 'rgba(255,150,100,0.15)', fontSize: '11px', padding: '2px 8px' }}>
+                        {item.is_form ? 'Форма' : 'Email'}
+                      </span>
+                    </div>
+                  </td>
                   <td>{item.email || '—'}</td>
                   <td>{item.fio || '—'}</td>
                   <td>{item.organization || '—'}</td>
@@ -497,6 +508,20 @@ export default function RequestsArchive() {
               <div>
                 <div className="label">Статус</div>
                 <span className="tag" style={{ fontSize: 14, padding: '6px 14px' }}>{selectedRequest.status}</span>
+              </div>
+              
+              <div>
+                <div className="label">Источник заявки</div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  {selectedRequest.is_form ? <FileText size={18} /> : <Mail size={18} />}
+                  <span className="tag" style={{ 
+                    fontSize: 14, 
+                    padding: '6px 14px',
+                    background: selectedRequest.is_form ? 'rgba(100,150,255,0.2)' : 'rgba(255,150,100,0.2)' 
+                  }}>
+                    {selectedRequest.is_form ? '📋 Форма' : '✉ Email'}
+                  </span>
+                </div>
               </div>
 
               <div className="grid cols-2">

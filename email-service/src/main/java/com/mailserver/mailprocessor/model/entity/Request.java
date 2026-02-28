@@ -82,6 +82,10 @@ public class Request {
     @Column(name = "raw_email_content", columnDefinition = "TEXT")
     private String rawEmailContent;
     
+    @Column(name = "is_form")
+    @Builder.Default
+    private Boolean isForm = false;
+    
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

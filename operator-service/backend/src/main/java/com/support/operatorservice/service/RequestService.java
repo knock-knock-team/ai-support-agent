@@ -71,9 +71,14 @@ public class RequestService {
                 + ", тип прибора: " + (payload.getDeviceType() != null ? payload.getDeviceType() : "Не указано")
                 + ", серийный номер: " + (payload.getSerialNumber() != null ? payload.getSerialNumber() : "Не указано");
 
+        // Determine if request is from form - if isForm is explicitly set use it, otherwise true if created via API
+        Boolean isFormRequest = payload.getIsForm() != null ? payload.getIsForm() : true;
+        
+        String userMessageText = payload.getUserMessage() != null ? payload.getUserMessage() : summaryMessage;
+        
         Request request = Request.builder()
                 .subject(projectTitle)
-                .userMessage(summaryMessage)
+                .userMessage(userMessageText)
                 .aiResponse(aiAnswer)
                 .confidence((double) confidence)
                 .senderEmail(payload.getEmail())
@@ -94,6 +99,7 @@ public class RequestService {
                 .status(Request.Status.NEW)
                 .createdAt(payload.getCreatedAt())
                 .updatedAt(payload.getUpdatedAt())
+                .isForm(isFormRequest)
                 .build();
 
         if (confidence >= AUTO_SEND_THRESHOLD) {

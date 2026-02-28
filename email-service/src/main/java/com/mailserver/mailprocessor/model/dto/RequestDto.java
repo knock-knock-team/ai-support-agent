@@ -64,6 +64,9 @@ public class RequestDto {
     @Builder.Default
     private LocalDateTime updatedAt = LocalDateTime.now();
     
+    @Builder.Default
+    private Boolean isForm = false;
+    
     // Email metadata
     private String emailSubject;
     private String emailBody;

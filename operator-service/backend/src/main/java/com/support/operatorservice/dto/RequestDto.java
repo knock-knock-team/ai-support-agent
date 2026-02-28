@@ -43,6 +43,10 @@ public class RequestDto {
     private OffsetDateTime updatedAt;
     @JsonProperty("responded_at")
     private OffsetDateTime respondedAt;
+    @JsonProperty("is_form")
+    private Boolean isForm;
+    @JsonProperty("user_message")
+    private String userMessage;
     
     public static RequestDto fromEntity(Request request) {
         return RequestDto.builder()
@@ -66,6 +70,8 @@ public class RequestDto {
                 .createdAt(request.getCreatedAt())
             .updatedAt(request.getUpdatedAt())
                 .respondedAt(request.getRespondedAt())
+                .isForm(request.getIsForm())
+                .userMessage(request.getUserMessage())
                 .build();
     }
 }
