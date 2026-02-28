@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Optional
+from typing import Optional, Dict, Any
 
 from fastapi import HTTPException
 from anyio import to_thread
@@ -20,15 +20,16 @@ class AgentService:
         service_conf = ServiceConfig(context_max_chars=settings.context_max_chars)
         self._agent = QwenAgent(
             model_config=model_conf,
-            inference_config=inference_conf,
+            # inference_config=inference_conf,
             service_config=service_conf,
         )
 
-    async def generate(self, message: str, context: Optional[str] = None) -> str:
+    async def generate(self, message: str, context: Optional[str] = None) -> Dict[str, Any]:
         try:
             # the underlying call is CPU/GPU heavy so run in a thread
             result = await to_thread.run_sync(self._agent.generate, message, context)
-            return result
+            response, confidence = result.get('response'), result.get('confidence')
+            return {"response": response, "confidence": confidence}
         except Exception as exc:
             raise HTTPException(status_code=500, detail=str(exc))
 

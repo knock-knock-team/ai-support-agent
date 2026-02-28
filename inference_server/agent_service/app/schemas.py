@@ -11,7 +11,7 @@ class GenerateRequest(BaseModel):
 
 class GenerateResponse(BaseModel):
     response: str = Field(..., description="Generated response")
-
+    confidence: float = Field(..., description="Confidence score for the response")
 
 class HealthResponse(BaseModel):
     status: str

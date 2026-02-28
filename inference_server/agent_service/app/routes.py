@@ -14,8 +14,9 @@ def get_service(request: Request) -> AgentService:
 
 @router.post("/generate", response_model=GenerateResponse)
 async def generate(request: GenerateRequest, svc: AgentService = Depends(get_service)) -> GenerateResponse:
-    response_text = await svc.generate(request.message, request.context)
-    return GenerateResponse(response=response_text)
+    result = await svc.generate(request.message, request.context)
+    response, confidence = result.get("response"), result.get("confidence")
+    return GenerateResponse(response=response, confidence=confidence)
 
 
 @router.get("/health", response_model=HealthResponse)
