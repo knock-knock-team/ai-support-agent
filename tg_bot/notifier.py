@@ -1,6 +1,7 @@
 from aiogram import Bot
 from config import BOT_TOKEN
-from storage import get_subscribers
+# from storage import get_subscribers
+from database.repository import get_subscribers
 
 
 def create_bot():

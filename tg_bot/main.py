@@ -4,10 +4,13 @@ from aiogram import Dispatcher, types
 from aiogram.filters import Command
 
 from config import API_HOST, API_PORT
-from storage import subscribe, unsubscribe
+# from storage import subscribe, unsubscribe
+from database.repository import subscribe, unsubscribe
 from notifier import create_bot
 from api import app as fastapi_app
 
+from database.connection import init_db
+    
 import uvicorn
 
 bot = create_bot()
@@ -42,6 +45,7 @@ async def start_api():
 
 
 async def main():
+    await init_db()
     await asyncio.gather(
         start_bot(),
         start_api()
