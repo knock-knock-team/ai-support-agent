@@ -11,7 +11,7 @@ from rag_system.utils.logging import logger
 
 
 class QdrantVectorStore(VectorStore):
-    def __init__(self, collection_name: str = "rag_collection"):
+    def __init__(self, collection_name: str = "knowledge_base"):
         self.collection_name = collection_name
         self.client = QdrantClient(
             url=settings.qdrant_url, api_key=settings.qdrant_api_key

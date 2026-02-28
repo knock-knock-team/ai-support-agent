@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager
 
 from .routes import router
 from .service import RagService
+from .config import settings
 
 
 def create_app() -> FastAPI:
@@ -12,7 +13,7 @@ def create_app() -> FastAPI:
     @asynccontextmanager
     async def lifespan(app: FastAPI):
         # startup: instantiate service
-        app.state.rag_service = RagService()
+        app.state.rag_service = RagService(settings.embedding_model_onnx, settings.embedding_model_onnx_tokenizer)
         try:
             yield
         finally:

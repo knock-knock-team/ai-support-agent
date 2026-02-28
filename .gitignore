@@ -43,3 +43,4 @@ build/
 ### Data ###
 *.docx
 agent/openvino_model/
+all-MiniLM-L6-v2

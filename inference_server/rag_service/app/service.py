@@ -15,8 +15,8 @@ from rag_system.retrieval.retriever import Retriever
 
 
 class RagService:
-    def __init__(self) -> None:
-        embedder = SentenceTransformerEmbedder(model_name=settings.embedding_model)
+    def __init__(self, embedding_model_name: str | None = None, embedding_model_tokenizer_name: str | None = None) -> None:
+        embedder = SentenceTransformerEmbedder(model_name=embedding_model_name or settings.embedding_model, tokenizer_name=embedding_model_tokenizer_name or settings.embedding_model)
         vector_store = QdrantVectorStore()
         self._indexer = Indexer(embedder=embedder, vector_store=vector_store)
         self._retriever = Retriever(embedder=embedder, vector_store=vector_store)
