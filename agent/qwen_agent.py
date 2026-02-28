@@ -194,8 +194,8 @@ class QwenAgent:
         generation_score = self.compute_confidence(inputs, output)
 
         confidence = (
-            0.4 * structure_score +
-            0.6 * generation_score
+            0.5 * structure_score +
+            0.5 * generation_score
         )
 
         return round(confidence, 2)
@@ -350,11 +350,11 @@ class QwenAgent:
             "\n"
             "1. date — дата поступления письма\n"
             "2. fio — фамилия, имя, отчество отправителя\n"
-            "3. object — название предприятия или объекта\n"
+            "3. organization — название предприятия или объекта\n"
             "4. phone — контактный номер телефона\n"
             "5. email — адрес электронной почты\n"
             "6. serial_numbers — номера приборов (список строк)\n"
-            "7. device_types — тип или модель приборов (список строк)\n"
+            "7. device_type — тип или модель приборов (список строк)\n"
             "8. problem_summary — краткое описание сути обращения\n"
             "\n"
             "Правила:\n"
