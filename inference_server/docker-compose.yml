@@ -1,0 +1,26 @@
+version: "3.8"
+
+services:
+  agent_service:
+    build:
+      context: ..
+      dockerfile: inference_server/agent_service/Dockerfile
+    ports:
+      - "8001:8001"
+    environment:
+      # customize via env or .env file
+      MODEL_NAME: "Qwen/Qwen2.5-3B-Instruct"
+      USE_4BIT: "True"
+      # other settings can be specified as needed
+
+  rag_service:
+    build:
+      context: ..
+      dockerfile: inference_server/rag_service/Dockerfile
+    ports:
+      - "8002:8002"
+    # environment:
+    #   QDRANT_URL: "http://qdrant:6333"
+    #   QDRANT_API_KEY: ""
+    #   EMBEDDING_MODEL: "BAAI/bge-small-en-v1.5"
+    #   # optional tuning
