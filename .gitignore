@@ -31,5 +31,14 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Python ###
 *.env
 *.venv
+/tests
+*__pycache__
+*/models_cache
+*.pytest_cache
+
+### Data ###
+*.docx
